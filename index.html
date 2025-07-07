@@ -1460,23 +1460,34 @@ if (history) this.workHistory = JSON.parse(history);
                 this.breakTime.textContent = this.msToHms(totalMs);
             }
 
-            sendToGoogleSheet(action, time, notes = "") {
-                const url = "https://script.google.com/macros/s/AKfycbxXQlE-x0pXxDjdY04wdAZqsQpDcrWktx9QjaNXXyW_kNxa_pGsY-dDLLrEcyxVCeLA/exec";
-                fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        action: action,
-                        time: time,
-                        notes: notes
-                    })
-                })
-                .then(response => response.text())
-                .then(data => console.log("Response:", data))
-                .catch(error => console.error("Error:", error));
-            }
+            // ✅ معالجة مشكلة CORS + التأكد من وجود العنصر قبل ربط الحدث
+sendToGoogleSheet(action, time, notes = "") {
+    const url = "https://script.google.com/macros/s/AKfycbxXQlE-x0pXxDjdY04wdAZqsQpDcrWktx9QjaNXXyW_kNxa_pGsY-dDLLrEcyxVCeLA/exec";
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            action: action,
+            time: time,
+            notes: notes
+        })
+    })
+    .then(response => response.text())
+    .then(data => console.log("Response:", data))
+    .catch(error => console.error("Error:", error));
+}
+
+// تأكد من وجود العنصر قبل ربط الحدث
+document.addEventListener("DOMContentLoaded", () => {
+    const shareBtn = document.getElementById("share-button");
+    if (shareBtn) {
+        shareBtn.addEventListener("click", () => {
+            sendToGoogleSheet("check-in", "08:00 AM", "وصلت بدري");
+        });
+    }
+});
         } // نهاية الكلاس
 
         // تشغيل التطبيق بعد تحميل الصفحة
