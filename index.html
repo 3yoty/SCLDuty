@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyShift Pro - Advanced Work Hours Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+            --danger-color: #ef4444;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #6366f1;
+            --secondary-color: #34d399;
+            --accent-color: #fbbf24;
+            --danger-color: #f87171;
+            --bg-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --card-bg: rgba(30, 41, 59, 0.95);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle, .lang-toggle {
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover, .lang-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .card:hover {
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .shift-controls {
+            grid-column: 1 / -1;
+        }
+
+        .shift-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .shift-type {
+            padding: 15px;
+            background: rgba(var(--primary-color), 0.1);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .shift-type.active {
+            border-color: var(--primary-color);
+            background: rgba(var(--primary-color), 0.2);
+        }
+
+        .shift-type h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .shift-type p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .custom-duration {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .duration-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .duration-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .clock-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .clock-in-btn, .break-btn, .reset-btn {
+            flex: 1;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .clock-in-btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .break-btn {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #f59e0b 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .clock-in-btn:hover, .break-btn:hover, .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .clock-in-btn:disabled, .break-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .session-info {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .session-info.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: rgba(var(--secondary-color), 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(var(--secondary-color), 0.2);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .countdown-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 25px;
+            background: rgba(var(--primary-color), 0.1);
+            border-radius: 16px;
+            border: 2px solid rgba(var(--primary-color), 0.2);
+        }
+
+        .countdown-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .countdown-time {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-family: 'Inter', monospace;
+        }
+
+        .countdown-time.warning {
+            color: var(--accent-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .break-tracking {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(var(--accent-color), 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(var(--accent-color), 0.2);
+        }
+
+        .break-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(var(--accent-color), 0.2);
+        }
+
+        .break-item:last-child {
+            border-bottom: none;
+        }
+
+        .statistics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            background: rgba(var(--primary-color), 0.1);
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(var(--primary-color), 0.2);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .calendar-view {
+            margin-top: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-nav button {
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav button:hover {
+            background: var(--secondary-color);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(var(--primary-color), 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: rgba(var(--primary-color), 0.2);
+        }
+
+        .calendar-day.worked {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary-color);
+        }
+
+        .settings-section {
+            margin-bottom: 20px;
+        }
+
+        .settings-group {
+            margin-bottom: 15px;
+        }
+
+        .settings-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .settings-input, .settings-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .settings-input:focus, .settings-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(var(--secondary-color), 0.1);
+            border-radius: 12px;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background: var(--primary-color);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+            max-width: 300px;
+        }
+
+        .notification.success {
+            background: var(--secondary-color);
+        }
+
+        .notification.warning {
+            background: var(--accent-color);
+        }
+
+        .notification.error {
+            background: var(--danger-color);
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .notes-section {
+            margin-top: 20px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .notes-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .productivity-meter {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(var(--primary-color), 0.1);
+            border-radius: 12px;
+        }
+
+        .productivity-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(var(--primary-color), 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .productivity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--danger-color) 0%, var(--accent-color) 50%, var(--secondary-color) 100%);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .clock-actions {
+                flex-direction: column;
+            }
+            
+            .statistics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .calendar-grid {
+                font-size: 0.8rem;
+            }
+            
+            .notification {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                margin: 0;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">MyShift Pro</div>
+            <div class="subtitle">Advanced Work Hours Tracker</div>
+            <div class="controls">
+                <button class="theme-toggle" id="themeToggle">🌙 Dark Mode</button>
+                <button class="lang-toggle" id="langToggle">🌐 عربي</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Shift Controls -->
+            <div class="card shift-controls">
+                <h3 class="card-title">⏰ Shift Controls</h3>
+                
+                <div class="shift-types">
+                    <div class="shift-type active" data-hours="8">
+                        <h4>Standard Shift</h4>
+                        <p>8 hours</p>
+                    </div>
+                    <div class="shift-type" data-hours="10">
+                        <h4>Extended Shift</h4>
+                        <p>10 hours</p>
+                    </div>
+                    <div class="shift-type" data-hours="12">
+                        <h4>Long Shift</h4>
+                        <p>12 hours</p>
+                    </div>
+                    <div class="shift-type" data-hours="4">
+                        <h4>Part Time</h4>
+                        <p>4 hours</p>
+                    </div>
+                </div>
+
+                <div class="custom-duration">
+                    <label>Custom Duration:</label>
+                    <input type="number" class="duration-input" id="customHours" value="10" min="1" max="24" step="0.5">
+                    <span>hours</span>
+                </div>
+
+                <div class="custom-clockin" style="margin-bottom:10px;">
+                    <label for="manualClockIn">Manual Clock In:</label>
+                    <input type="time" id="manualClockIn" class="duration-input" style="width:auto;">
+                </div>
+
+                <div class="clock-actions">
+                    <button class="clock-in-btn" id="clockInBtn">🕐 Clock In</button>
+                    <button class="break-btn" id="breakBtn" disabled>☕ Break</button>
+                    <button class="reset-btn" id="resetBtn">🔄 Reset</button>
+                </div>
+
+                <div class="session-info" id="sessionInfo">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Clock In</div>
+                            <div class="info-value" id="clockInTime">--:--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Clock Out</div>
+                            <div class="info-value" id="clockOutTime">--:--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Total Work</div>
+                            <div class="info-value" id="totalWork">0h 0m</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Break Time</div>
+                            <div class="info-value" id="breakTime">0h 0m</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Expected End</div>
+                            <div class="info-value" id="expectedEndTime">--:--</div>
+                        </div>
+                    </div>
+
+                    <div class="countdown-container">
+                        <div class="countdown-label">Time Remaining</div>
+                        <div class="countdown-time" id="countdownTime">00:00:00</div>
+                    </div>
+
+                    <div class="break-tracking" id="breakTracking">
+                        <h4>Break History</h4>
+                        <div id="breakList"></div>
+                    </div>
+
+                    <div class="custom-clockout" style="margin-bottom:10px;">
+                        <label for="manualClockOut">Manual Clock Out:</label>
+                        <input type="time" id="manualClockOut" class="duration-input" style="width:auto;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="card">
+                <h3 class="card-title">📊 Statistics</h3>
+                <div class="statistics-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="todayHours">0</div>
+                        <div class="stat-label">Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weekHours">0</div>
+                        <div class="stat-label">This Week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="monthHours">0</div>
+                        <div class="stat-label">This Month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="overtimeHours">0</div>
+                        <div class="stat-label">Overtime</div>
+                    </div>
+                </div>
+
+                <div class="productivity-meter">
+                    <h4>Productivity Score</h4>
+                    <div class="productivity-bar">
+                        <div class="productivity-fill" id="productivityFill" style="width: 75%"></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 10px; font-weight: 600;" id="productivityScore">75%</div>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="card">
+                <h3 class="card-title">📅 Calendar</h3>
+                <div class="calendar-view">
+                    <div class="calendar-header">
+                        <h4 id="calendarMonth">December 2024</h4>
+                        <div class="calendar-nav">
+                            <button id="prevMonth">‹</button>
+                            <button id="nextMonth">›</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+            </div>
+
+            <!-- Settings & Export -->
+            <div class="card">
+                <h3 class="card-title">⚙️ Settings</h3>
+                
+                <div class="settings-section">
+                    <div class="settings-group">
+                        <label class="settings-label">Notification Sound</label>
+                        <select class="settings-select" id="notificationSound">
+                            <option value="beep">Beep</option>
+                            <option value="chime">Chime</option>
+                            <option value="bell">Bell</option>
+                            <option value="none">None</option>
+                        </select>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <label class="settings-label">Warning Time (minutes)</label>
+                        <input type="number" class="settings-input" id="warningTime" value="15" min="5" max="60">
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <h4>Export Data</h4>
+                    <div class="export-buttons">
+                        <button class="export-btn" id="exportCSV">📄 Export CSV</button>
+                        <button class="export-btn" id="exportJSON">📋 Export JSON</button>
+                        <button class="export-btn" id="backupData">💾 Backup</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card">
+                <h3 class="card-title">📝 Daily Notes</h3>
+                <div class="notes-section">
+                    <textarea class="notes-textarea" id="dailyNotes" placeholder="Add notes about your workday..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <!-- Break Modal -->
+    <div class="modal" id="breakModal">
+        <div class="modal-content">
+            <h3>Break Time</h3>
+            <p>You're currently on break. Click "End Break" to continue working.</p>
+            <button class="clock-in-btn" id="endBreakBtn" style="width: 100%; margin-top: 20px;">End Break</button>
+        </div>
+    </div>
+
+    <script>
+        // مثال مبسط
+const translations = {
+    ar: {
+        logo: "ماي شفت برو",
+        subtitle: "متتبع ساعات العمل المتقدم",
+        shiftControls: "⏰ التحكم في الشفت",
+        statistics: "📊 الإحصائيات",
+        calendar: "📅 التقويم",
+        settings: "⚙️ الإعدادات",
+        notes: "📝 ملاحظات اليوم",
+        standardShift: "دوام عادي",
+        extendedShift: "دوام ممتد",
+        longShift: "دوام طويل",
+        partTime: "دوام جزئي",
+        hours: "ساعات",
+        customDuration: "مدة مخصصة:",
+        manualClockIn: "تسجيل دخول يدوي:",
+        manualClockOut: "تسجيل خروج يدوي:",
+        clockIn: "دخول",
+        clockOut: "خروج",
+        totalWork: "إجمالي العمل",
+        breakTime: "وقت الاستراحة",
+        expectedEnd: "وقت الانتهاء المتوقع",
+        timeRemaining: "الوقت المتبقي",
+        breakHistory: "سجل الاستراحات",
+        clockInBtn: "🕐 دخول",
+        clockOutBtn: "🕑 خروج",
+        breakBtn: "☕ استراحة",
+        resetBtn: "🔄 إعادة تعيين",
+        today: "اليوم",
+        thisWeek: "هذا الأسبوع",
+        thisMonth: "هذا الشهر",
+        overtime: "ساعات إضافية",
+        productivityScore: "معدل الإنتاجية",
+        exportCSV: "📄 تصدير CSV",
+        exportJSON: "📋 تصدير JSON",
+        backup: "💾 نسخ احتياطي",
+        notificationSound: "صوت الإشعار",
+        warningTime: "وقت التحذير (دقائق)",
+        exportData: "تصدير البيانات",
+        endBreak: "إنهاء الاستراحة",
+        addNotes: "أضف ملاحظات حول يوم عملك...",
+        darkMode: "🌙 الوضع الليلي",
+        lightMode: "☀️ الوضع النهاري",
+        langBtn: "🌐 English"
+    },
+    en: {
+        logo: "MyShift Pro",
+        subtitle: "Advanced Work Hours Tracker",
+        shiftControls: "⏰ Shift Controls",
+        statistics: "📊 Statistics",
+        calendar: "📅 Calendar",
+        settings: "⚙️ Settings",
+        notes: "📝 Daily Notes",
+        standardShift: "Standard Shift",
+        extendedShift: "Extended Shift",
+        longShift: "Long Shift",
+        partTime: "Part Time",
+        hours: "hours",
+        customDuration: "Custom Duration:",
+        manualClockIn: "Manual Clock In:",
+        manualClockOut: "Manual Clock Out:",
+        clockIn: "Clock In",
+        clockOut: "Clock Out",
+        totalWork: "Total Work",
+        breakTime: "Break Time",
+        expectedEnd: "Expected End",
+        timeRemaining: "Time Remaining",
+        breakHistory: "Break History",
+        clockInBtn: "🕐 Clock In",
+        clockOutBtn: "🕑 Clock Out",
+        breakBtn: "☕ Break",
+        resetBtn: "🔄 Reset",
+        today: "Today",
+        thisWeek: "This Week",
+        thisMonth: "This Month",
+        overtime: "Overtime",
+        productivityScore: "Productivity Score",
+        exportCSV: "📄 Export CSV",
+        exportJSON: "📋 Export JSON",
+        backup: "💾 Backup",
+        notificationSound: "Notification Sound",
+        warningTime: "Warning Time (minutes)",
+        exportData: "Export Data",
+        endBreak: "End Break",
+        addNotes: "Add notes about your workday...",
+        darkMode: "🌙 Dark Mode",
+        lightMode: "☀️ Light Mode",
+        langBtn: "🌐 عربي"
+    }
+};
+
+        class MyShiftPro {
+            constructor() {
+                this.isEnglish = true;
+                this.isDarkMode = false;
+                this.currentSession = null;
+                this.breaks = [];
+                this.workHistory = [];
+                this.settings = {
+                    notificationSound: 'beep',
+                    warningTime: 15,
+                    hourlyRate: 15
+                };
+                this.countdownInterval = null;
+                this.currentDate = new Date();
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.loadData();
+                this.updateCalendar();
+                this.updateStatistics();
+                this.requestNotificationPermission();
+            }
+
+            initializeElements() {
+                // Main controls
+                this.clockInBtn = document.getElementById('clockInBtn');
+                this.breakBtn = document.getElementById('breakBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.customHours = document.getElementById('customHours');
+                this.sessionInfo = document.getElementById('sessionInfo');
+                
+                // Display elements
+                this.clockInTime = document.getElementById('clockInTime');
+                this.clockOutTime = document.getElementById('clockOutTime');
+                this.totalWork = document.getElementById('totalWork');
+                this.breakTime = document.getElementById('breakTime');
+                this.countdownTime = document.getElementById('countdownTime');
+                this.breakList = document.getElementById('breakList');
+                
+                // Statistics
+                this.todayHours = document.getElementById('todayHours');
+this.weekHours = document.getElementById('weekHours');
+this.monthHours = document.getElementById('monthHours');
+this.overtimeHours = document.getElementById('overtimeHours');
+this.productivityFill = document.getElementById('productivityFill');
+this.productivityScore = document.getElementById('productivityScore');
+                
+                // Calendar
+                this.calendarMonth = document.getElementById('calendarMonth');
+                this.calendarGrid = document.getElementById('calendarGrid');
+                this.prevMonth = document.getElementById('prevMonth');
+                this.nextMonth = document.getElementById('nextMonth');
+                
+                // Settings
+                this.notificationSound = document.getElementById('notificationSound');
+                this.warningTime = document.getElementById('warningTime');
+                
+                // Others
+                this.themeToggle = document.getElementById('themeToggle');
+                this.langToggle = document.getElementById('langToggle');
+                this.dailyNotes = document.getElementById('dailyNotes');
+                this.notificationContainer = document.getElementById('notificationContainer');
+                this.breakModal = document.getElementById('breakModal');
+                this.endBreakBtn = document.getElementById('endBreakBtn');
+
+                this.manualClockIn = document.getElementById('manualClockIn');
+                this.manualClockOut = document.getElementById('manualClockOut');
+
+                this.expectedEndTime = document.getElementById('expectedEndTime');
+            }
+
+            bindEvents() {
+                // Main controls
+                this.clockInBtn.addEventListener('click', () => this.toggleClockIn());
+                this.breakBtn.addEventListener('click', () => this.toggleBreak());
+                this.resetBtn.addEventListener('click', () => this.resetSession());
+                this.customHours.addEventListener('change', () => this.updateShiftDuration());
+                
+                // Shift types
+                document.querySelectorAll('.shift-type').forEach(type => {
+                    type.addEventListener('click', () => this.selectShiftType(type));
+                });
+                
+                // Calendar navigation
+                this.prevMonth.addEventListener('click', () => this.changeMonth(-1));
+                this.nextMonth.addEventListener('click', () => this.changeMonth(1));
+                
+                // Settings
+                this.notificationSound.addEventListener('change', () => this.updateSettings());
+                this.warningTime.addEventListener('change', () => this.updateSettings());
+                
+                // Theme and language
+                this.themeToggle.addEventListener('click', () => this.toggleTheme());
+                this.langToggle.addEventListener('click', () => this.toggleLanguage());
+
+                // Notes
+                this.dailyNotes.addEventListener('input', () => this.saveNotes());
+
+                // Export & Backup
+                document.getElementById('exportCSV').addEventListener('click', () => this.exportCSV());
+                document.getElementById('exportJSON').addEventListener('click', () => this.exportJSON());
+                document.getElementById('backupData').addEventListener('click', () => this.backupData());
+
+                // Break Modal
+                this.endBreakBtn.addEventListener('click', () => this.endBreak());
+            }
+
+            toggleClockIn() {
+                if (!this.currentSession) {
+                    // بدء الشفت
+                    let manualTime = this.manualClockIn.value;
+                    let clockInDate = new Date();
+                    if (manualTime) {
+                        // استخدم التاريخ الحالي مع الوقت المدخل
+                        let [h, m] = manualTime.split(':');
+                        clockInDate.setHours(Number(h), Number(m), 0, 0);
+                    }
+                    this.currentSession = {
+                        clockIn: clockInDate,
+                        clockOut: null,
+                        breaks: [],
+                        duration: Number(this.customHours.value)
+                    };
+                    this.clockInTime.textContent = this.formatTime(this.currentSession.clockIn);
+                    this.clockOutTime.textContent = '--:--';
+                    this.breakTime.textContent = '0h 0m';
+                    this.totalWork.textContent = '0h 0m';
+                    this.sessionInfo.classList.add('active');
+                    this.clockInBtn.textContent = "🕑 Clock Out";
+                    this.breakBtn.disabled = false;
+                    this.resetBtn.disabled = false;
+                    this.startCountdown();
+                    this.manualClockIn.value = ""; // إعادة تعيين الحقل بعد الاستخدام
+                    this.updateExpectedEndTime();
+
+                    // عند تسجيل الدخول
+this.sendToGoogleSheet("دخول", new Date(this.currentSession.clockIn).toLocaleString());
+                } else {
+                    // إنهاء الشفت
+                    let manualOut = this.manualClockOut.value;
+                    let clockOutDate = new Date();
+                    if (manualOut) {
+                        // استخدم التاريخ الحالي مع الوقت المدخل
+                        let [h, m] = manualOut.split(':');
+                        clockOutDate.setHours(Number(h), Number(m), 0, 0);
+                    }
+                    this.currentSession.clockOut = clockOutDate;
+                    this.clockOutTime.textContent = this.formatTime(this.currentSession.clockOut);
+                    let totalMs = this.currentSession.clockOut - this.currentSession.clockIn - this.getBreaksMs();
+                    this.totalWork.textContent = this.msToHms(totalMs);
+                    this.workHistory.push(this.currentSession);
+                    localStorage.setItem('myshift_history', JSON.stringify(this.workHistory));
+                    this.currentSession = null;
+                    this.clockInBtn.textContent = "🕐 Clock In";
+                    this.breakBtn.disabled = true;
+                    this.resetBtn.disabled = false;
+                    this.stopCountdown();
+                    this.updateStatistics();
+                    this.updateCalendar();
+                    this.manualClockOut.value = ""; // إعادة تعيين الحقل بعد الاستخدام
+
+                    // عند تسجيل الخروج
+this.sendToGoogleSheet("خروج", this.formatTime(this.currentSession.clockOut));
+                }
+            }
+
+            toggleBreak() {
+                if (!this.currentSession) return;
+                // بدء بريك
+                this.breakStart = new Date();
+                this.breakBtn.disabled = true;
+                this.showBreakModal();
+            }
+
+            endBreak() {
+                if (!this.currentSession || !this.breakStart) return;
+                // إنهاء البريك
+                let breakEnd = new Date();
+                this.currentSession.breaks.push({ start: this.breakStart, end: breakEnd });
+                this.breakStart = null;
+                this.breakBtn.disabled = false;
+                this.hideBreakModal();
+                this.updateBreakList();
+            }
+
+            resetSession() {
+                this.currentSession = null;
+                this.breakStart = null;
+                this.sessionInfo.classList.remove('active');
+                this.clockInTime.textContent = '--:--';
+                this.clockOutTime.textContent = '--:--';
+                this.breakTime.textContent = '0h 0m';
+                this.totalWork.textContent = '0h 0m';
+                this.clockInBtn.textContent = "🕐 Clock In";
+                this.breakBtn.disabled = true;
+                this.stopCountdown();
+            }
+
+            updateShiftDuration() {
+                let val = Number(this.customHours.value);
+                if (val < 1) this.customHours.value = 1;
+                if (val > 24) this.customHours.value = 24;
+                if (this.currentSession) {
+                    this.currentSession.duration = Number(this.customHours.value);
+                    this.updateExpectedEndTime();
+                }
+            }
+
+            updateExpectedEndTime() {
+                if (!this.currentSession || !this.currentSession.clockIn) {
+                    this.expectedEndTime.textContent = '--:--';
+                    return;
+                }
+                let end = new Date(this.currentSession.clockIn);
+                let duration = Number(this.currentSession.duration) || 8;
+                end.setHours(end.getHours() + duration);
+                this.expectedEndTime.textContent = this.formatTime(end);
+            }
+
+            selectShiftType(type) {
+                document.querySelectorAll('.shift-type').forEach(t => t.classList.remove('active'));
+                type.classList.add('active');
+                this.customHours.value = type.getAttribute('data-hours');
+            }
+
+            changeMonth(direction) {
+                this.currentDate.setMonth(this.currentDate.getMonth() + direction);
+                this.updateCalendar();
+            }
+
+            updateSettings() {
+                this.settings.notificationSound = this.notificationSound.value;
+                this.settings.warningTime = Number(this.warningTime.value);
+            }
+
+            toggleTheme() {
+                this.isDarkMode = !this.isDarkMode;
+                document.documentElement.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
+                this.themeToggle.textContent = this.isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode";
+            }
+
+            toggleLanguage() {
+                this.isEnglish = !this.isEnglish;
+                const lang = this.isEnglish ? 'en' : 'ar';
+                const t = translations[lang];
+
+                // الشعار والعنوان الفرعي
+                document.querySelector('.logo').textContent = t.logo;
+                document.querySelector('.subtitle').textContent = t.subtitle;
+
+                // عناوين البطاقات
+                document.querySelectorAll('.card-title')[0].textContent = t.shiftControls;
+                document.querySelectorAll('.card-title')[1].textContent = t.statistics;
+                document.querySelectorAll('.card-title')[2].textContent = t.calendar;
+                document.querySelectorAll('.card-title')[3].textContent = t.settings;
+                document.querySelectorAll('.card-title')[4].textContent = t.notes;
+
+                // أنواع الشفت
+                const shiftTypes = document.querySelectorAll('.shift-type');
+                shiftTypes[0].querySelector('h4').textContent = t.standardShift;
+                shiftTypes[0].querySelector('p').textContent = "8 " + t.hours;
+                shiftTypes[1].querySelector('h4').textContent = t.extendedShift;
+                shiftTypes[1].querySelector('p').textContent = "10 " + t.hours;
+                shiftTypes[2].querySelector('h4').textContent = t.longShift;
+                shiftTypes[2].querySelector('p').textContent = "12 " + t.hours;
+                shiftTypes[3].querySelector('h4').textContent = t.partTime;
+                shiftTypes[3].querySelector('p').textContent = "4 " + t.hours;
+
+                // التسميات
+                document.querySelector('.custom-duration label').textContent = t.customDuration;
+                document.querySelector('.custom-clockin label').textContent = t.manualClockIn;
+                document.querySelector('.custom-clockout label').textContent = t.manualClockOut;
+
+                // أزرار التحكم
+                this.clockInBtn.textContent = this.currentSession ? t.clockOutBtn : t.clockInBtn;
+                this.breakBtn.textContent = t.breakBtn;
+                this.resetBtn.textContent = t.resetBtn;
+
+                // تسميات المعلومات
+                document.querySelectorAll('.info-label')[0].textContent = t.clockIn;
+                document.querySelectorAll('.info-label')[1].textContent = t.clockOut;
+                document.querySelectorAll('.info-label')[2].textContent = t.totalWork;
+                document.querySelectorAll('.info-label')[3].textContent = t.breakTime;
+                document.querySelectorAll('.info-label')[4].textContent = t.expectedEnd;
+
+                // العداد
+                document.querySelector('.countdown-label').textContent = t.timeRemaining;
+
+                // سجل الاستراحات
+                document.querySelector('#breakTracking h4').textContent = t.breakHistory;
+
+                // Placeholder للملاحظات
+                this.dailyNotes.placeholder = t.addNotes;
+
+                // إحصائيات
+                document.getElementById('todayHours').nextElementSibling.textContent = t.today;
+                document.getElementById('weekHours').nextElementSibling.textContent = t.thisWeek;
+                document.getElementById('monthHours').nextElementSibling.textContent = t.thisMonth;
+                document.getElementById('overtimeHours').nextElementSibling.textContent = t.overtime;
+
+                // معدل الإنتاجية
+                document.querySelector('.productivity-meter h4').textContent = t.productivityScore;
+
+                // إعدادات
+                document.querySelectorAll('.settings-label')[0].textContent = t.notificationSound;
+                document.querySelectorAll('.settings-label')[1].textContent = t.warningTime;
+
+                // تصدير البيانات
+                document.querySelector('.export-section h4').textContent = t.exportData;
+                document.getElementById('exportCSV').textContent = t.exportCSV;
+                document.getElementById('exportJSON').textContent = t.exportJSON;
+                document.getElementById('backupData').textContent = t.backup;
+
+                // زر اللغة
+                this.langToggle.textContent = t.langBtn;
+
+                // زر الوضع الليلي/النهاري
+                this.themeToggle.textContent = this.isDarkMode ? t.lightMode : t.darkMode;
+
+                // زر إنهاء الاستراحة في المودال
+                document.getElementById('endBreakBtn').textContent = t.endBreak;
+
+                // اتجاه الصفحة
+                document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+                document.body.style.textAlign = lang === 'ar' ? 'right' : 'left';
+            }
+
+            saveNotes() {
+                localStorage.setItem('myshift_notes', this.dailyNotes.value);
+            }
+
+            exportCSV() {
+                let csv = "Clock In,Clock Out,Total Work\n";
+                this.workHistory.forEach(s => {
+                    csv += `${this.formatTime(s.clockIn)},${s.clockOut ? this.formatTime(s.clockOut) : ''},${s.clockOut ? this.msToHms(s.clockOut - s.clockIn - this.getBreaksMs(s)) : ''}\n`;
+                });
+                this.downloadFile(csv, 'work_history.csv', 'text/csv');
+            }
+
+            exportJSON() {
+                let data = JSON.stringify(this.workHistory, null, 2);
+                this.downloadFile(data, 'work_history.json', 'application/json');
+            }
+
+            backupData() {
+                let data = {
+                    workHistory: this.workHistory,
+                    notes: this.dailyNotes.value,
+                    settings: this.settings
+                };
+                this.downloadFile(JSON.stringify(data, null, 2), 'myshift_backup.json', 'application/json');
+            }
+
+            downloadFile(data, filename, type) {
+                let blob = new Blob([data], { type });
+                let url = URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            showBreakModal() {
+                this.breakModal.classList.add('active');
+            }
+
+            hideBreakModal() {
+                this.breakModal.classList.remove('active');
+            }
+
+            loadData() {
+                let notes = localStorage.getItem('myshift_notes');
+                if (notes) this.dailyNotes.value = notes;
+                // يمكنك تحميل بيانات أخرى من localStorage إذا أردت
+                let history = localStorage.getItem('myshift_history');
+if (history) this.workHistory = JSON.parse(history);
+            }
+
+            updateCalendar() {
+                // عرض الشهر الحالي وأيامه (عرض بسيط)
+                let month = this.currentDate.toLocaleString(this.isEnglish ? 'en' : 'ar', { month: 'long', year: 'numeric' });
+                this.calendarMonth.textContent = month;
+                let firstDay = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
+                let lastDay = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
+                let days = [];
+                for (let i = 1; i <= lastDay.getDate(); i++) {
+                    days.push(i);
+                }
+                this.calendarGrid.innerHTML = '';
+                let workedDays = this.workHistory
+    .filter(s => s.clockIn)
+    .map(s => {
+        let d = new Date(s.clockIn);
+        return d.getDate() + '-' + d.getMonth() + '-' + d.getFullYear();
+    });
+
+                days.forEach(day => {
+                    let div = document.createElement('div');
+                    div.className = 'calendar-day';
+                    div.textContent = day;
+                    let today = new Date();
+                    if (
+                        day === today.getDate() &&
+                        this.currentDate.getMonth() === today.getMonth() &&
+                        this.currentDate.getFullYear() === today.getFullYear()
+                    ) {
+                        div.classList.add('today');
+                    }
+                    // تمييز أيام العمل
+                    let key = day + '-' + this.currentDate.getMonth() + '-' + this.currentDate.getFullYear();
+                    if (workedDays.includes(key)) {
+                        div.classList.add('worked');
+                    }
+                    this.calendarGrid.appendChild(div);
+                });
+            }
+
+            updateStatistics() {
+                let today = new Date();
+                let todayHours = 0, weekHours = 0, monthHours = 0, overtime = 0;
+                this.workHistory.forEach(s => {
+                    if (!s.clockOut || isNaN(new Date(s.clockIn)) || isNaN(new Date(s.clockOut))) return;
+                    let workMs = new Date(s.clockOut) - new Date(s.clockIn) - this.getBreaksMs(s);
+                    let workH = workMs / (1000 * 60 * 60);
+                    let d = new Date(s.clockIn);
+                    if (
+                        d.getDate() === today.getDate() &&
+                        d.getMonth() === today.getMonth() &&
+                        d.getFullYear() === today.getFullYear()
+                    ) todayHours += workH;
+                    if (this.isSameWeek(d, today)) weekHours += workH;
+                    if (d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) monthHours += workH;
+                    if (workH > (s.duration || 8)) overtime += workH - (s.duration || 8);
+                });
+                this.todayHours.textContent = todayHours.toFixed(1);
+                this.weekHours.textContent = weekHours.toFixed(1);
+                this.monthHours.textContent = monthHours.toFixed(1);
+                this.overtimeHours.textContent = overtime.toFixed(1);
+
+                // إنتاجية
+                let duration = Number(this.customHours.value) || 8;
+                let prod = duration > 0 ? Math.min(100, Math.round((todayHours / duration) * 100)) : 0;
+                this.productivityFill.style.width = prod + '%';
+                this.productivityScore.textContent = prod + '%';
+            }
+
+            requestNotificationPermission() {
+                if ('Notification' in window && Notification.permission !== 'granted') {
+                    Notification.requestPermission();
+                }
+            }
+
+            startCountdown() {
+                if (this.countdownInterval) clearInterval(this.countdownInterval);
+                let durationMs = (this.currentSession.duration || 8) * 60 * 60 * 1000;
+                let start = this.currentSession.clockIn;
+                this.countdownInterval = setInterval(() => {
+                    let now = new Date();
+                    let elapsed = now - start - this.getBreaksMs();
+                    let remaining = durationMs - elapsed;
+                    if (remaining < 0) remaining = 0;
+                    let h = Math.floor(remaining / 3600000);
+                    let m = Math.floor((remaining % 3600000) / 60000);
+                    let s = Math.floor((remaining % 60000) / 1000);
+                    this.countdownTime.textContent = `${h.toString().padStart(2, '0')}:${m
+                        .toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                    if (remaining === 0) {
+                        this.countdownTime.classList.add('warning');
+                        if (!this.notified) {
+                            this.showNotification('Shift time is over!');
+                            if (this.settings.notificationSound !== 'none') {
+                                this.playSound(this.settings.notificationSound);
+                            }
+                            this.notified = true;
+                        }
+                    } else {
+                        this.countdownTime.classList.remove('warning');
+                        this.notified = false;
+                    }
+                }, 1000);
+            }
+
+            stopCountdown() {
+                if (this.countdownInterval) clearInterval(this.countdownInterval);
+                this.countdownTime.textContent = '00:00:00';
+                this.countdownTime.classList.remove('warning');
+            }
+
+            msToHms(ms) {
+                let h = Math.floor(ms / 3600000);
+                let m = Math.floor((ms % 3600000) / 60000);
+                return `${h}h ${m}m`;
+            }
+
+            getBreaksMs(session = this.currentSession) {
+                if (!session || !session.breaks) return 0;
+                return session.breaks.reduce((sum, b) => sum + (b.end - b.start), 0);
+            }
+
+            formatTime(date) {
+                if (!date) return '--:--';
+                let d = new Date(date);
+                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            showNotification(msg) {
+                let div = document.createElement('div');
+                div.className = 'notification success';
+                div.textContent = msg;
+                this.notificationContainer.appendChild(div);
+                setTimeout(() => div.remove(), 4000);
+            }
+
+            playSound(type) {
+                let audio;
+                switch (type) {
+                    case 'beep':
+                        audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae3e5.mp3');
+                        break;
+                    case 'chime':
+                        audio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7bfa.mp3');
+                        break;
+                    case 'bell':
+                        audio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7bfa.mp3');
+                        break;
+                    default:
+                        return;
+                }
+                audio.play();
+            }
+
+            isSameWeek(d1, d2) {
+                // احسب بداية الأسبوع (الأحد) لكل تاريخ
+                const startOfWeek = date => {
+                    const d = new Date(date);
+                    d.setHours(0, 0, 0, 0);
+                    d.setDate(d.getDate() - d.getDay());
+                    return d;
+                };
+                return startOfWeek(d1).getTime() === startOfWeek(d2).getTime();
+            }
+
+            updateBreakList() {
+                if (!this.currentSession) return;
+                this.breakList.innerHTML = '';
+                this.currentSession.breaks.forEach((b, i) => {
+                    let div = document.createElement('div');
+                    div.className = 'break-item';
+                    div.innerHTML = `<span>Break ${i + 1}</span>
+                        <span>${this.formatTime(b.start)} - ${this.formatTime(b.end)}</span>`;
+                    this.breakList.appendChild(div);
+                });
+                // تحديث إجمالي وقت البريك
+                let totalMs = this.getBreaksMs();
+                this.breakTime.textContent = this.msToHms(totalMs);
+            }
+
+            sendToGoogleSheet(action, time, notes = "") {
+                const url = "https://script.google.com/macros/s/AKfycbxXQlE-x0pXxDjdY04wdAZqsQpDcrWktx9QjaNXXyW_kNxa_pGsY-dDLLrEcyxVCeLA/exec";
+                fetch(url, {
+                    method: "POST",
+                    mode: "no-cors", // مهم لجعل الطلب يعمل بدون مشاكل CORS
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        action: action, // "دخول" أو "خروج"
+                        time: time,     // الوقت (مثلاً: this.formatTime(new Date()))
+                        notes: notes    // أي ملاحظات إضافية
+                    })
+                });
+            }
+        } // نهاية الكلاس
+
+        // تشغيل التطبيق بعد تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            window.myShiftPro = new MyShiftPro();
+        });
+    </script>
+</body>
+</html>
