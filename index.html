@@ -1061,10 +1061,10 @@ this.sendToGoogleSheet("دخول", new Date(this.currentSession.clockIn).toLocal
                     this.stopCountdown();
                     this.updateStatistics();
                     this.updateCalendar();
-                    this.manualClockOut.value = ""; // إعادة تعيين الحقل بعد الاستخدام
+                    this.manualClockOut.value = "";
 
-                    // عند تسجيل الخروج
-this.sendToGoogleSheet("خروج", this.formatTime(this.currentSession.clockOut));
+                    // استخدم القيمة المحفوظة
+                    this.sendToGoogleSheet("خروج", this.formatTime(clockOutValue));
                 }
             }
 
@@ -1464,16 +1464,18 @@ if (history) this.workHistory = JSON.parse(history);
                 const url = "https://script.google.com/macros/s/AKfycbxXQlE-x0pXxDjdY04wdAZqsQpDcrWktx9QjaNXXyW_kNxa_pGsY-dDLLrEcyxVCeLA/exec";
                 fetch(url, {
                     method: "POST",
-                    mode: "no-cors", // مهم لجعل الطلب يعمل بدون مشاكل CORS
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        action: action, // "دخول" أو "خروج"
-                        time: time,     // الوقت (مثلاً: this.formatTime(new Date()))
-                        notes: notes    // أي ملاحظات إضافية
+                        action: action,
+                        time: time,
+                        notes: notes
                     })
-                });
+                })
+                .then(response => response.text())
+                .then(data => console.log("Response:", data))
+                .catch(error => console.error("Error:", error));
             }
         } // نهاية الكلاس
 
