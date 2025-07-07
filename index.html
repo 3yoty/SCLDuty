@@ -1484,7 +1484,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const shareBtn = document.getElementById("share-button");
     if (shareBtn) {
         shareBtn.addEventListener("click", () => {
-            sendToGoogleSheet("check-in", "08:00 AM", "وصلت بدري");
+            // استخدم this إذا كانت sendToGoogleSheet ضمن كلاس، أو عدّل حسب السياق
+            if (typeof sendToGoogleSheet === "function") {
+                sendToGoogleSheet("check-in", "08:00 AM", "وصلت بدري");
+            } else if (window.myShiftPro && typeof window.myShiftPro.sendToGoogleSheet === "function") {
+                window.myShiftPro.sendToGoogleSheet("check-in", "08:00 AM", "وصلت بدري");
+            }
         });
     }
 });
