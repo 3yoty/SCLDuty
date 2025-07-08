@@ -634,11 +634,11 @@
                 <h3 class="card-title">⏰ Shift Controls</h3>
                 
                 <div class="shift-types">
-                    <div class="shift-type active" data-hours="8">
+                    <div class="shift-type" data-hours="8">
                         <h4>Standard Shift</h4>
                         <p>8 hours</p>
                     </div>
-                    <div class="shift-type" data-hours="10">
+                    <div class="shift-type active" data-hours="10">
                         <h4>Extended Shift</h4>
                         <p>10 hours</p>
                     </div>
@@ -657,15 +657,13 @@
                     <input type="number" class="duration-input" id="customHours" value="10" min="1" max="24" step="0.5">
                     <span>hours</span>
                 </div>
-
-                <div class="custom-clockin" style="margin-bottom:10px;">
-                    <label for="manualClockIn">Manual Clock In:</label>
-                    <input type="time" id="manualClockIn" class="duration-input" style="width:auto;">
+                <div class="custom-duration">
+                    <label>Manual Clock In:</label>
+                    <input type="time" class="duration-input" id="manualClockIn">
                 </div>
 
                 <div class="clock-actions">
                     <button class="clock-in-btn" id="clockInBtn">🕐 Clock In</button>
-                    <button class="break-btn" id="breakBtn" disabled>☕ Break</button>
                     <button class="reset-btn" id="resetBtn">🔄 Reset</button>
                 </div>
 
@@ -687,10 +685,6 @@
                             <div class="info-label">Break Time</div>
                             <div class="info-value" id="breakTime">0h 0m</div>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Expected End</div>
-                            <div class="info-value" id="expectedEndTime">--:--</div>
-                        </div>
                     </div>
 
                     <div class="countdown-container">
@@ -701,11 +695,6 @@
                     <div class="break-tracking" id="breakTracking">
                         <h4>Break History</h4>
                         <div id="breakList"></div>
-                    </div>
-
-                    <div class="custom-clockout" style="margin-bottom:10px;">
-                        <label for="manualClockOut">Manual Clock Out:</label>
-                        <input type="time" id="manualClockOut" class="duration-input" style="width:auto;">
                     </div>
                 </div>
             </div>
@@ -800,702 +789,737 @@
     <!-- Notification Container -->
     <div id="notificationContainer"></div>
 
-    <!-- Break Modal -->
-    <div class="modal" id="breakModal">
-        <div class="modal-content">
-            <h3>Break Time</h3>
-            <p>You're currently on break. Click "End Break" to continue working.</p>
-            <button class="clock-in-btn" id="endBreakBtn" style="width: 100%; margin-top: 20px;">End Break</button>
-        </div>
-    </div>
-
     <script>
-        // مثال مبسط
-const translations = {
-    ar: {
-        logo: "ماي شفت برو",
-        subtitle: "متتبع ساعات العمل المتقدم",
-        shiftControls: "⏰ التحكم في الشفت",
-        statistics: "📊 الإحصائيات",
-        calendar: "📅 التقويم",
-        settings: "⚙️ الإعدادات",
-        notes: "📝 ملاحظات اليوم",
-        standardShift: "دوام عادي",
-        extendedShift: "دوام ممتد",
-        longShift: "دوام طويل",
-        partTime: "دوام جزئي",
-        hours: "ساعات",
-        customDuration: "مدة مخصصة:",
-        manualClockIn: "تسجيل دخول يدوي:",
-        manualClockOut: "تسجيل خروج يدوي:",
-        clockIn: "دخول",
-        clockOut: "خروج",
-        totalWork: "إجمالي العمل",
-        breakTime: "وقت الاستراحة",
-        expectedEnd: "وقت الانتهاء المتوقع",
-        timeRemaining: "الوقت المتبقي",
-        breakHistory: "سجل الاستراحات",
-        clockInBtn: "🕐 دخول",
-        clockOutBtn: "🕑 خروج",
-        breakBtn: "☕ استراحة",
-        resetBtn: "🔄 إعادة تعيين",
-        today: "اليوم",
-        thisWeek: "هذا الأسبوع",
-        thisMonth: "هذا الشهر",
-        overtime: "ساعات إضافية",
-        productivityScore: "معدل الإنتاجية",
-        exportCSV: "📄 تصدير CSV",
-        exportJSON: "📋 تصدير JSON",
-        backup: "💾 نسخ احتياطي",
-        notificationSound: "صوت الإشعار",
-        warningTime: "وقت التحذير (دقائق)",
-        exportData: "تصدير البيانات",
-        endBreak: "إنهاء الاستراحة",
-        addNotes: "أضف ملاحظات حول يوم عملك...",
-        darkMode: "🌙 الوضع الليلي",
-        lightMode: "☀️ الوضع النهاري",
-        langBtn: "🌐 English"
-    },
-    en: {
-        logo: "MyShift Pro",
-        subtitle: "Advanced Work Hours Tracker",
-        shiftControls: "⏰ Shift Controls",
-        statistics: "📊 Statistics",
-        calendar: "📅 Calendar",
-        settings: "⚙️ Settings",
-        notes: "📝 Daily Notes",
-        standardShift: "Standard Shift",
-        extendedShift: "Extended Shift",
-        longShift: "Long Shift",
-        partTime: "Part Time",
-        hours: "hours",
-        customDuration: "Custom Duration:",
-        manualClockIn: "Manual Clock In:",
-        manualClockOut: "Manual Clock Out:",
-        clockIn: "Clock In",
-        clockOut: "Clock Out",
-        totalWork: "Total Work",
-        breakTime: "Break Time",
-        expectedEnd: "Expected End",
-        timeRemaining: "Time Remaining",
-        breakHistory: "Break History",
-        clockInBtn: "🕐 Clock In",
-        clockOutBtn: "🕑 Clock Out",
-        breakBtn: "☕ Break",
-        resetBtn: "🔄 Reset",
-        today: "Today",
-        thisWeek: "This Week",
-        thisMonth: "This Month",
-        overtime: "Overtime",
-        productivityScore: "Productivity Score",
-        exportCSV: "📄 Export CSV",
-        exportJSON: "📋 Export JSON",
-        backup: "💾 Backup",
-        notificationSound: "Notification Sound",
-        warningTime: "Warning Time (minutes)",
-        exportData: "Export Data",
-        endBreak: "End Break",
-        addNotes: "Add notes about your workday...",
-        darkMode: "🌙 Dark Mode",
-        lightMode: "☀️ Light Mode",
-        langBtn: "🌐 عربي"
+class MyShiftPro {
+    constructor() {
+        this.isEnglish = true;
+        this.isDarkMode = false;
+        this.currentSession = null;
+        this.breaks = [];
+        this.workHistory = [];
+        this.settings = {
+            notificationSound: 'beep',
+            warningTime: 15
+        };
+        this.countdownInterval = null;
+        this.currentDate = new Date();
+
+        this.initializeElements();
+        this.bindEvents();
+        this.loadData();
+        this.updateCalendar();
+        this.updateStatistics();
+        this.requestNotificationPermission();
     }
-};
 
-        class MyShiftPro {
-            constructor() {
-                this.isEnglish = true;
-                this.isDarkMode = false;
-                this.currentSession = null;
-                this.breaks = [];
-                this.workHistory = [];
-                this.settings = {
-                    notificationSound: 'beep',
-                    warningTime: 15,
-                    hourlyRate: 15
-                };
-                this.countdownInterval = null;
-                this.currentDate = new Date();
-                
-                this.initializeElements();
-                this.bindEvents();
-                this.loadData();
-                this.updateCalendar();
-                this.updateStatistics();
-                this.requestNotificationPermission();
-            }
+    initializeElements() {
+        // Main controls
+        this.clockInBtn = document.getElementById('clockInBtn');
+        this.resetBtn = document.getElementById('resetBtn');
+        this.customHours = document.getElementById('customHours');
+        this.manualClockIn = document.getElementById('manualClockIn');
+        this.sessionInfo = document.getElementById('sessionInfo');
 
-            initializeElements() {
-                // Main controls
-                this.clockInBtn = document.getElementById('clockInBtn');
-                this.breakBtn = document.getElementById('breakBtn');
-                this.resetBtn = document.getElementById('resetBtn');
-                this.customHours = document.getElementById('customHours');
-                this.sessionInfo = document.getElementById('sessionInfo');
-                
-                // Display elements
-                this.clockInTime = document.getElementById('clockInTime');
-                this.clockOutTime = document.getElementById('clockOutTime');
-                this.totalWork = document.getElementById('totalWork');
-                this.breakTime = document.getElementById('breakTime');
-                this.countdownTime = document.getElementById('countdownTime');
-                this.breakList = document.getElementById('breakList');
-                
-                // Statistics
-                this.todayHours = document.getElementById('todayHours');
-this.weekHours = document.getElementById('weekHours');
-this.monthHours = document.getElementById('monthHours');
-this.overtimeHours = document.getElementById('overtimeHours');
-this.productivityFill = document.getElementById('productivityFill');
-this.productivityScore = document.getElementById('productivityScore');
-                
-                // Calendar
-                this.calendarMonth = document.getElementById('calendarMonth');
-                this.calendarGrid = document.getElementById('calendarGrid');
-                this.prevMonth = document.getElementById('prevMonth');
-                this.nextMonth = document.getElementById('nextMonth');
-                
-                // Settings
-                this.notificationSound = document.getElementById('notificationSound');
-                this.warningTime = document.getElementById('warningTime');
-                
-                // Others
-                this.themeToggle = document.getElementById('themeToggle');
-                this.langToggle = document.getElementById('langToggle');
-                this.dailyNotes = document.getElementById('dailyNotes');
-                this.notificationContainer = document.getElementById('notificationContainer');
-                this.breakModal = document.getElementById('breakModal');
-                this.endBreakBtn = document.getElementById('endBreakBtn');
+        // Display elements
+        this.clockInTime = document.getElementById('clockInTime');
+        this.clockOutTime = document.getElementById('clockOutTime');
+        this.totalWork = document.getElementById('totalWork');
+        this.breakTime = document.getElementById('breakTime');
+        this.countdownTime = document.getElementById('countdownTime');
+        this.breakList = document.getElementById('breakList');
 
-                this.manualClockIn = document.getElementById('manualClockIn');
-                this.manualClockOut = document.getElementById('manualClockOut');
+        // Statistics
+        this.todayHours = document.getElementById('todayHours');
+        this.weekHours = document.getElementById('weekHours');
+        this.monthHours = document.getElementById('monthHours');
+        this.overtimeHours = document.getElementById('overtimeHours');
+        this.productivityFill = document.getElementById('productivityFill');
+        this.productivityScore = document.getElementById('productivityScore');
+        
+        // Calendar
+        this.calendarMonth = document.getElementById('calendarMonth');
+        this.calendarGrid = document.getElementById('calendarGrid');
+        this.prevMonth = document.getElementById('prevMonth');
+        this.nextMonth = document.getElementById('nextMonth');
+        
+        // Settings
+        this.notificationSound = document.getElementById('notificationSound');
+        this.warningTime = document.getElementById('warningTime');
+        
+        // Others
+        this.themeToggle = document.getElementById('themeToggle');
+        this.langToggle = document.getElementById('langToggle');
+        this.dailyNotes = document.getElementById('dailyNotes');
+        this.notificationContainer = document.getElementById('notificationContainer');
+    }
 
-                this.expectedEndTime = document.getElementById('expectedEndTime');
-            }
+    bindEvents() {
+        // Main controls
+        this.clockInBtn.addEventListener('click', () => this.toggleClockIn());
+        this.resetBtn.addEventListener('click', () => this.resetSession());
+        this.customHours.addEventListener('change', () => this.updateShiftDuration());
+        this.manualClockIn.addEventListener('change', () => this.updateManualClockIn());
 
-            bindEvents() {
-                // تأكد من وجود العناصر قبل إضافة الأحداث
-            if (this.clockInBtn) this.clockInBtn.addEventListener('click', () => this.toggleClockIn());
-            if (this.breakBtn) this.breakBtn.addEventListener('click', () => this.toggleBreak());
-            if (this.resetBtn) this.resetBtn.addEventListener('click', () => this.resetSession());
-            if (this.customHours) this.customHours.addEventListener('change', () => this.updateShiftDuration());
+        // Shift types
+        document.querySelectorAll('.shift-type').forEach(type => {
+            type.addEventListener('click', () => this.selectShiftType(type));
+        });
+        
+        // Calendar navigation
+        this.prevMonth.addEventListener('click', () => this.changeMonth(-1));
+        this.nextMonth.addEventListener('click', () => this.changeMonth(1));
+        
+        // Settings
+        this.notificationSound.addEventListener('change', () => this.updateSettings());
+        this.warningTime.addEventListener('change', () => this.updateSettings());
+        
+        // Theme and language
+        this.themeToggle.addEventListener('click', () => this.toggleTheme());
+        this.langToggle.addEventListener('click', () => this.toggleLanguage());
+        
+        // Export buttons
+        document.getElementById('exportCSV').addEventListener('click', () => this.exportData('csv'));
+        document.getElementById('exportJSON').addEventListener('click', () => this.exportData('json'));
+        document.getElementById('backupData').addEventListener('click', () => this.backupData());
+        
+        // Notes
+        this.dailyNotes.addEventListener('change', () => this.saveNotes());
+        
+        // Auto-save every 30 seconds
+        setInterval(() => this.saveData(), 30000);
+    }
 
-            // Shift types
-            document.querySelectorAll('.shift-type').forEach(type => {
-                type.addEventListener('click', () => this.selectShiftType(type));
-            });
+    selectShiftType(selectedType) {
+        document.querySelectorAll('.shift-type').forEach(type => {
+            type.classList.remove('active');
+        });
+        selectedType.classList.add('active');
+        
+        const hours = parseFloat(selectedType.dataset.hours);
+        this.customHours.value = hours;
+        this.updateShiftDuration();
+    }
 
-            // Calendar navigation
-            if (this.prevMonth) this.prevMonth.addEventListener('click', () => this.changeMonth(-1));
-            if (this.nextMonth) this.nextMonth.addEventListener('click', () => this.changeMonth(1));
-
-            // Settings
-            if (this.notificationSound) this.notificationSound.addEventListener('change', () => this.updateSettings());
-            if (this.warningTime) this.warningTime.addEventListener('change', () => this.updateSettings());
-
-            // Theme and language
-            if (this.themeToggle) this.themeToggle.addEventListener('click', () => this.toggleTheme());
-            if (this.langToggle) this.langToggle.addEventListener('click', () => this.toggleLanguage());
-
-            // Notes
-            if (this.dailyNotes) this.dailyNotes.addEventListener('input', () => this.saveNotes());
-
-            // Export & Backup
-            const exportCSVBtn = document.getElementById('exportCSV');
-            if (exportCSVBtn) exportCSVBtn.addEventListener('click', () => this.exportCSV());
-            const exportJSONBtn = document.getElementById('exportJSON');
-            if (exportJSONBtn) exportJSONBtn.addEventListener('click', () => this.exportJSON());
-            const backupDataBtn = document.getElementById('backupData');
-            if (backupDataBtn) backupDataBtn.addEventListener('click', () => this.backupData());
-
-            // Break Modal
-            if (this.endBreakBtn) this.endBreakBtn.addEventListener('click', () => this.endBreak());
+    updateShiftDuration() {
+        if (this.currentSession && this.currentSession.clockInTime) {
+            const duration = parseFloat(this.customHours.value);
+            this.currentSession.plannedDuration = duration;
+            this.currentSession.clockOutTime = new Date(this.currentSession.clockInTime.getTime() + (duration * 60 * 60 * 1000));
+            this.updateDisplay();
         }
+    }
 
-        toggleClockIn() {
-            if (!this.currentSession) {
-                // بدء الشفت
-                let manualTime = this.manualClockIn.value;
-                let clockInDate = new Date();
-                if (manualTime) {
-                    // استخدم التاريخ الحالي مع الوقت المدخل
-                    let [h, m] = manualTime.split(':');
-                    clockInDate.setHours(Number(h), Number(m), 0, 0);
-                }
-                this.currentSession = {
-                    clockIn: clockInDate,
-                    clockOut: null,
-                    breaks: [],
-                    duration: Number(this.customHours.value)
-                };
-                this.clockInTime.textContent = this.formatTime(this.currentSession.clockIn);
-                this.clockOutTime.textContent = '--:--';
-                this.breakTime.textContent = '0h 0m';
-                this.totalWork.textContent = '0h 0m';
-                this.sessionInfo.classList.add('active');
-                this.clockInBtn.textContent = "🕑 Clock Out";
-                this.breakBtn.disabled = false;
-                this.resetBtn.disabled = false;
-                this.startCountdown();
-                this.manualClockIn.value = ""; // إعادة تعيين الحقل بعد الاستخدام
-                this.updateExpectedEndTime();
-
-                // عند تسجيل الدخول
-this.sendToGoogleSheet("دخول", new Date(this.currentSession.clockIn).toLocaleString());
+    updateManualClockIn() {
+        // Only update if session not started
+        if (!this.currentSession) {
+            const today = new Date();
+            const [h, m] = this.manualClockIn.value.split(':');
+            if (h !== undefined && m !== undefined) {
+                today.setHours(parseInt(h), parseInt(m), 0, 0);
+                this.manualClockInTime = new Date(today);
             } else {
-                // إنهاء الشفت
-                let manualOut = this.manualClockOut.value;
-                let clockOutDate = new Date();
-                if (manualOut) {
-                    // استخدم التاريخ الحالي مع الوقت المدخل
-                    let [h, m] = manualOut.split(':');
-                    clockOutDate.setHours(Number(h), Number(m), 0, 0);
-                }
-                this.currentSession.clockOut = clockOutDate;
-                this.clockOutTime.textContent = this.formatTime(this.currentSession.clockOut);
-                let totalMs = this.currentSession.clockOut - this.currentSession.clockIn - this.getBreaksMs();
-                this.totalWork.textContent = this.msToHms(totalMs);
-                this.workHistory.push(this.currentSession);
-                localStorage.setItem('myshift_history', JSON.stringify(this.workHistory));
-                this.currentSession = null;
-                this.clockInBtn.textContent = "🕐 Clock In";
-                this.breakBtn.disabled = true;
-                this.resetBtn.disabled = false;
-                this.stopCountdown();
-                this.updateStatistics();
-                this.updateCalendar();
-                this.manualClockOut.value = "";
-
-                // استخدم القيمة المحفوظة
-                this.sendToGoogleSheet("خروج", this.formatTime(clockOutValue));
+                this.manualClockInTime = null;
             }
         }
+    }
 
-        toggleBreak() {
-            if (!this.currentSession) return;
-            // بدء بريك
-            this.breakStart = new Date();
-            this.breakBtn.disabled = true;
-            this.showBreakModal();
+    toggleClockIn() {
+        if (!this.currentSession || !this.currentSession.clockInTime) {
+            this.clockIn();
+        } else {
+            this.clockOut();
         }
+    }
 
-        endBreak() {
-            if (!this.currentSession || !this.breakStart) return;
-            // إنهاء البريك
-            let breakEnd = new Date();
-            this.currentSession.breaks.push({ start: this.breakStart, end: breakEnd });
-            this.breakStart = null;
-            this.breakBtn.disabled = false;
-            this.hideBreakModal();
-            this.updateBreakList();
+    clockIn() {
+        let now;
+        if (this.manualClockInTime) {
+            now = new Date(this.manualClockInTime);
+        } else {
+            now = new Date();
         }
+        const duration = parseFloat(this.customHours.value);
+        
+        this.currentSession = {
+            id: Date.now(),
+            clockInTime: now,
+            clockOutTime: new Date(now.getTime() + (duration * 60 * 60 * 1000)),
+            plannedDuration: duration,
+            actualClockOutTime: null,
+            breaks: [],
+            totalBreakTime: 0,
+            notes: '',
+        };
+        
+        this.clockInBtn.textContent = '🕐 Clock Out';
+        this.sessionInfo.classList.add('active');
+        
+        this.updateDisplay();
+        this.startCountdown();
+        this.showNotification(this.isEnglish ? 'Clocked in successfully!' : 'تم تسجيل الدخول بنجاح!', 'success');
+        this.saveData();
+    }
 
-        resetSession() {
-            this.currentSession = null;
-            this.breakStart = null;
-            this.sessionInfo.classList.remove('active');
-            this.clockInTime.textContent = '--:--';
-            this.clockOutTime.textContent = '--:--';
-            this.breakTime.textContent = '0h 0m';
-            this.totalWork.textContent = '0h 0m';
-            this.clockInBtn.textContent = "🕐 Clock In";
-            this.breakBtn.disabled = true;
-            this.stopCountdown();
-        }
-
-        updateShiftDuration() {
-            let val = Number(this.customHours.value);
-            if (val < 1) this.customHours.value = 1;
-            if (val > 24) this.customHours.value = 24;
-            if (this.currentSession) {
-                this.currentSession.duration = Number(this.customHours.value);
-                this.updateExpectedEndTime();
-            }
-        }
-
-        updateExpectedEndTime() {
-            if (!this.currentSession || !this.currentSession.clockIn) {
-                this.expectedEndTime.textContent = '--:--';
-                return;
-            }
-            let end = new Date(this.currentSession.clockIn);
-            let duration = Number(this.currentSession.duration) || 8;
-            end.setHours(end.getHours() + duration);
-            this.expectedEndTime.textContent = this.formatTime(end);
-        }
-
-        selectShiftType(type) {
-            document.querySelectorAll('.shift-type').forEach(t => t.classList.remove('active'));
-            type.classList.add('active');
-            this.customHours.value = type.getAttribute('data-hours');
-        }
-
-        changeMonth(direction) {
-            this.currentDate.setMonth(this.currentDate.getMonth() + direction);
-            this.updateCalendar();
-        }
-
-        updateSettings() {
-            this.settings.notificationSound = this.notificationSound.value;
-            this.settings.warningTime = Number(this.warningTime.value);
-        }
-
-        toggleTheme() {
-            this.isDarkMode = !this.isDarkMode;
-            document.documentElement.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
-            this.themeToggle.textContent = this.isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode";
-        }
-
-        toggleLanguage() {
-            this.isEnglish = !this.isEnglish;
-            const lang = this.isEnglish ? 'en' : 'ar';
-            const t = translations[lang];
-
-            // الشعار والعنوان الفرعي
-            document.querySelector('.logo').textContent = t.logo;
-            document.querySelector('.subtitle').textContent = t.subtitle;
-
-            // عناوين البطاقات
-            document.querySelectorAll('.card-title')[0].textContent = t.shiftControls;
-            document.querySelectorAll('.card-title')[1].textContent = t.statistics;
-            document.querySelectorAll('.card-title')[2].textContent = t.calendar;
-            document.querySelectorAll('.card-title')[3].textContent = t.settings;
-            document.querySelectorAll('.card-title')[4].textContent = t.notes;
-
-            // أنواع الشفت
-            const shiftTypes = document.querySelectorAll('.shift-type');
-            shiftTypes[0].querySelector('h4').textContent = t.standardShift;
-            shiftTypes[0].querySelector('p').textContent = "8 " + t.hours;
-            shiftTypes[1].querySelector('h4').textContent = t.extendedShift;
-            shiftTypes[1].querySelector('p').textContent = "10 " + t.hours;
-            shiftTypes[2].querySelector('h4').textContent = t.longShift;
-            shiftTypes[2].querySelector('p').textContent = "12 " + t.hours;
-            shiftTypes[3].querySelector('h4').textContent = t.partTime;
-            shiftTypes[3].querySelector('p').textContent = "4 " + t.hours;
-
-            // التسميات
-            document.querySelector('.custom-duration label').textContent = t.customDuration;
-            document.querySelector('.custom-clockin label').textContent = t.manualClockIn;
-            document.querySelector('.custom-clockout label').textContent = t.manualClockOut;
-
-            // أزرار التحكم
-            this.clockInBtn.textContent = this.currentSession ? t.clockOutBtn : t.clockInBtn;
-            this.breakBtn.textContent = t.breakBtn;
-            this.resetBtn.textContent = t.resetBtn;
-
-            // تسميات المعلومات
-            document.querySelectorAll('.info-label')[0].textContent = t.clockIn;
-            document.querySelectorAll('.info-label')[1].textContent = t.clockOut;
-            document.querySelectorAll('.info-label')[2].textContent = t.totalWork;
-            document.querySelectorAll('.info-label')[3].textContent = t.breakTime;
-            document.querySelectorAll('.info-label')[4].textContent = t.expectedEnd;
-
-            // العداد
-            document.querySelector('.countdown-label').textContent = t.timeRemaining;
-
-            // سجل الاستراحات
-            document.querySelector('#breakTracking h4').textContent = t.breakHistory;
-
-            // Placeholder للملاحظات
-            this.dailyNotes.placeholder = t.addNotes;
-
-            // إحصائيات
-            document.getElementById('todayHours').nextElementSibling.textContent = t.today;
-            document.getElementById('weekHours').nextElementSibling.textContent = t.thisWeek;
-            document.getElementById('monthHours').nextElementSibling.textContent = t.thisMonth;
-            document.getElementById('overtimeHours').nextElementSibling.textContent = t.overtime;
-
-            // معدل الإنتاجية
-            document.querySelector('.productivity-meter h4').textContent = t.productivityScore;
-
-            // إعدادات
-            document.querySelectorAll('.settings-label')[0].textContent = t.notificationSound;
-            document.querySelectorAll('.settings-label')[1].textContent = t.warningTime;
-
-            // تصدير البيانات
-            document.querySelector('.export-section h4').textContent = t.exportData;
-            document.getElementById('exportCSV').textContent = t.exportCSV;
-            document.getElementById('exportJSON').textContent = t.exportJSON;
-            document.getElementById('backupData').textContent = t.backup;
-
-            // زر اللغة
-            this.langToggle.textContent = t.langBtn;
-
-            // زر الوضع الليلي/النهاري
-            this.themeToggle.textContent = this.isDarkMode ? t.lightMode : t.darkMode;
-
-            // زر إنهاء الاستراحة في المودال
-            document.getElementById('endBreakBtn').textContent = t.endBreak;
-
-            // اتجاه الصفحة
-            document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
-            document.body.style.textAlign = lang === 'ar' ? 'right' : 'left';
-        }
-
-        saveNotes() {
-            localStorage.setItem('myshift_notes', this.dailyNotes.value);
-        }
-
-        exportCSV() {
-            let csv = "Clock In,Clock Out,Total Work\n";
-            this.workHistory.forEach(s => {
-                csv += `${this.formatTime(s.clockIn)},${s.clockOut ? this.formatTime(s.clockOut) : ''},${s.clockOut ? this.msToHms(s.clockOut - s.clockIn - this.getBreaksMs(s)) : ''}\n`;
-            });
-            this.downloadFile(csv, 'work_history.csv', 'text/csv');
-        }
-
-        exportJSON() {
-            let data = JSON.stringify(this.workHistory, null, 2);
-            this.downloadFile(data, 'work_history.json', 'application/json');
-        }
-
-        backupData() {
-            let data = {
-                workHistory: this.workHistory,
-                notes: this.dailyNotes.value,
-                settings: this.settings
-            };
-            this.downloadFile(JSON.stringify(data, null, 2), 'myshift_backup.json', 'application/json');
-        }
-
-        downloadFile(data, filename, type) {
-            let blob = new Blob([data], { type });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        showBreakModal() {
-            this.breakModal.classList.add('active');
-        }
-
-        hideBreakModal() {
-            this.breakModal.classList.remove('active');
-        }
-
-        loadData() {
-            let notes = localStorage.getItem('myshift_notes');
-            if (notes) this.dailyNotes.value = notes;
-            // يمكنك تحميل بيانات أخرى من localStorage إذا أردت
-            let history = localStorage.getItem('myshift_history');
-if (history) this.workHistory = JSON.parse(history);
-        }
-
-        updateCalendar() {
-            // عرض الشهر الحالي وأيامه (عرض بسيط)
-            let month = this.currentDate.toLocaleString(this.isEnglish ? 'en' : 'ar', { month: 'long', year: 'numeric' });
-            this.calendarMonth.textContent = month;
-            let firstDay = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
-            let lastDay = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
-            let days = [];
-            for (let i = 1; i <= lastDay.getDate(); i++) {
-                days.push(i);
-            }
-            this.calendarGrid.innerHTML = '';
-            let workedDays = this.workHistory
-    .filter(s => s.clockIn)
-    .map(s => {
-        let d = new Date(s.clockIn);
-        return d.getDate() + '-' + d.getMonth() + '-' + d.getFullYear();
-    });
-
-            days.forEach(day => {
-                let div = document.createElement('div');
-                div.className = 'calendar-day';
-                div.textContent = day;
-                let today = new Date();
-                if (
-                    day === today.getDate() &&
-                    this.currentDate.getMonth() === today.getMonth() &&
-                    this.currentDate.getFullYear() === today.getFullYear()
-                ) {
-                    div.classList.add('today');
-                }
-                // تمييز أيام العمل
-                let key = day + '-' + this.currentDate.getMonth() + '-' + this.currentDate.getFullYear();
-                if (workedDays.includes(key)) {
-                    div.classList.add('worked');
-                }
-                this.calendarGrid.appendChild(div);
-            });
-        }
-
-        updateStatistics() {
-            let today = new Date();
-            let todayHours = 0, weekHours = 0, monthHours = 0, overtime = 0;
-            this.workHistory.forEach(s => {
-                if (!s.clockOut || isNaN(new Date(s.clockIn)) || isNaN(new Date(s.clockOut))) return;
-                let workMs = new Date(s.clockOut) - new Date(s.clockIn) - this.getBreaksMs(s);
-                let workH = workMs / (1000 * 60 * 60);
-                let d = new Date(s.clockIn);
-                if (
-                    d.getDate() === today.getDate() &&
-                    d.getMonth() === today.getMonth() &&
-                    d.getFullYear() === today.getFullYear()
-                ) todayHours += workH;
-                if (this.isSameWeek(d, today)) weekHours += workH;
-                if (d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) monthHours += workH;
-                if (workH > (s.duration || 8)) overtime += workH - (s.duration || 8);
-            });
-            this.todayHours.textContent = todayHours.toFixed(1);
-            this.weekHours.textContent = weekHours.toFixed(1);
-            this.monthHours.textContent = monthHours.toFixed(1);
-            this.overtimeHours.textContent = overtime.toFixed(1);
-
-            // إنتاجية
-            let duration = Number(this.customHours.value) || 8;
-            let prod = duration > 0 ? Math.min(100, Math.round((todayHours / duration) * 100)) : 0;
-            this.productivityFill.style.width = prod + '%';
-            this.productivityScore.textContent = prod + '%';
-        }
-
-        requestNotificationPermission() {
-            if ('Notification' in window && Notification.permission !== 'granted') {
-                Notification.requestPermission();
-            }
-        }
-
-        startCountdown() {
-            if (this.countdownInterval) clearInterval(this.countdownInterval);
-            let durationMs = (this.currentSession.duration || 8) * 60 * 60 * 1000;
-            let start = this.currentSession.clockIn;
-            this.countdownInterval = setInterval(() => {
-                let now = new Date();
-                let elapsed = now - start - this.getBreaksMs();
-                let remaining = durationMs - elapsed;
-                if (remaining < 0) remaining = 0;
-                let h = Math.floor(remaining / 3600000);
-                let m = Math.floor((remaining % 3600000) / 60000);
-                let s = Math.floor((remaining % 60000) / 1000);
-                this.countdownTime.textContent = `${h.toString().padStart(2, '0')}:${m
-                    .toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                if (remaining === 0) {
-                    this.countdownTime.classList.add('warning');
-                    if (!this.notified) {
-                        this.showNotification('Shift time is over!');
-                        if (this.settings.notificationSound !== 'none') {
-                            this.playSound(this.settings.notificationSound);
-                        }
-                        this.notified = true;
-                    }
-                } else {
-                    this.countdownTime.classList.remove('warning');
-                    this.notified = false;
-                }
-            }, 1000);
-        }
-
-        stopCountdown() {
-            if (this.countdownInterval) clearInterval(this.countdownInterval);
-            this.countdownTime.textContent = '00:00:00';
-            this.countdownTime.classList.remove('warning');
-        }
-
-        msToHms(ms) {
-            let h = Math.floor(ms / 3600000);
-            let m = Math.floor((ms % 3600000) / 60000);
-            return `${h}h ${m}m`;
-        }
-
-        getBreaksMs(session = this.currentSession) {
-            if (!session || !session.breaks) return 0;
-            return session.breaks.reduce((sum, b) => sum + (b.end - b.start), 0);
-        }
-
-        formatTime(date) {
-            if (!date) return '--:--';
-            let d = new Date(date);
-            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        showNotification(msg) {
-            let div = document.createElement('div');
-            div.className = 'notification success';
-            div.textContent = msg;
-            this.notificationContainer.appendChild(div);
-            setTimeout(() => div.remove(), 4000);
-        }
-
-        playSound(type) {
-            let audio;
-            switch (type) {
-                case 'beep':
-                    audio = new Audio('https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae3e5.mp3');
-                    break;
-                case 'chime':
-                    audio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7bfa.mp3');
-                    break;
-                case 'bell':
-                    audio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7bfa.mp3');
-                    break;
-                default:
-                    return;
-            }
-            audio.play();
-        }
-
-        isSameWeek(d1, d2) {
-            // احسب بداية الأسبوع (الأحد) لكل تاريخ
-            const startOfWeek = date => {
-                const d = new Date(date);
-                d.setHours(0, 0, 0, 0);
-                d.setDate(d.getDate() - d.getDay());
-                return d;
-            };
-            return startOfWeek(d1).getTime() === startOfWeek(d2).getTime();
-        }
-
-        updateBreakList() {
-            if (!this.currentSession) return;
-            this.breakList.innerHTML = '';
-            this.currentSession.breaks.forEach((b, i) => {
-                let div = document.createElement('div');
-                div.className = 'break-item';
-                div.innerHTML = `<span>Break ${i + 1}</span>
-                    <span>${this.formatTime(b.start)} - ${this.formatTime(b.end)}</span>`;
-                this.breakList.appendChild(div);
-            });
-            // تحديث إجمالي وقت البريك
-            let totalMs = this.getBreaksMs();
-            this.breakTime.textContent = this.msToHms(totalMs);
-        }
-
-        // ✅ معالجة مشكلة CORS في sendToGoogleSheet (بدون mode: "no-cors" ومع إدارة الأخطاء)
-        sendToGoogleSheet(action, time, notes = "") {
-            const url = "https://script.google.com/macros/s/AKfycbxXQlE-x0pXxDjdY04wdAZqsQpDcrWktx9QjaNXXyW_kNxa_pGsY-dDLLrEcyxVCeLA/exec";
-            fetch(url, {
+    async sendToGoogleSheet(session) {
+        const url = "https://script.google.com/macros/s/AKfycbyyGL8TDjCNUysMuw92_z_IuGFFC6MyTCISAr-8uLoSBcTAa0tVMj8nQt1ZbeBnB2BC/exec";
+        const data = {
+            date: new Date(session.clockInTime).toLocaleDateString(),
+            clockIn: this.formatTime(new Date(session.clockInTime)),
+            clockOut: session.actualClockOutTime ? this.formatTime(new Date(session.actualClockOutTime)) : '',
+            hours: session.actualDuration ? session.actualDuration.toFixed(2) : '',
+            notes: session.notes || ''
+        };
+        try {
+            const response = await fetch(url, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    action: action,
-                    time: time,
-                    notes: notes
-                })
-            })
-            .then(response => response.text())
-            .then(data => console.log("Response:", data))
-            .catch(error => console.error("Error:", error));
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                console.log("Data sent");
+                this.showNotification(
+                    this.isEnglish
+                        ? "✅ Data sent to Google Sheets"
+                        : "✅ تم إرسال البيانات إلى Google Sheets",
+                    "success"
+                );
+            } else {
+                console.log("Failed");
+                this.showNotification(
+                    this.isEnglish
+                        ? "⚠️ Failed to send data"
+                        : "⚠️ فشل إرسال البيانات",
+                    "warning"
+                );
+            }
+        } catch (e) {
+            console.log("Failed");
+            this.showNotification(
+                this.isEnglish
+                    ? "⚠️ Failed to send data"
+                    : "⚠️ فشل إرسال البيانات",
+                "warning"
+            );
+        }
+    }
+
+    clockOut() {
+        this.currentSession.actualClockOutTime = new Date();
+        this.currentSession.actualDuration = (this.currentSession.actualClockOutTime - this.currentSession.clockInTime) / (1000 * 60 * 60);
+        this.currentSession.notes = this.dailyNotes.value;
+
+        // Add to work history
+        this.workHistory.push({...this.currentSession});
+
+        // إرسال البيانات إلى Google Sheet
+        this.sendToGoogleSheet(this.currentSession);
+
+        this.showNotification(
+            this.isEnglish
+                ? `Clocked out! You worked ${this.currentSession.actualDuration.toFixed(1)} hours.`
+                : `تم تسجيل الخروج! لقد عملت ${this.currentSession.actualDuration.toFixed(1)} ساعة.`,
+            'success'
+        );
+
+        this.resetSession();
+        this.updateStatistics();
+        this.updateCalendar();
+        this.saveData();
+    }
+
+    resetSession() {
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+        }
+        
+        this.currentSession = null;
+        this.clockInBtn.textContent = '🕐 Clock In';
+        this.sessionInfo.classList.remove('active');
+        this.dailyNotes.value = '';
+        this.manualClockIn.value = '';
+        this.manualClockInTime = null;
+        
+        this.saveData();
+    }
+
+    updateDisplay() {
+        if (!this.currentSession) return;
+        
+        this.clockInTime.textContent = this.formatTime(this.currentSession.clockInTime);
+        this.clockOutTime.textContent = this.formatTime(this.currentSession.clockOutTime);
+        
+        const now = new Date();
+        const workedMs = now - this.currentSession.clockInTime;
+        const workedHours = Math.floor(workedMs / (1000 * 60 * 60));
+        const workedMinutes = Math.floor((workedMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        this.totalWork.textContent = `${workedHours}h ${workedMinutes}m`;
+        
+        // Break always 0
+        this.breakTime.textContent = `0h 0m`;
+        this.breakList.innerHTML = '';
+    }
+
+    startCountdown() {
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
         }
 
-        // لا داعي لتكرار كود addEventListener هنا إذا لم يكن لديك زر باسم share-button في الصفحة
-    // إذا كان لديك ملف share-modal.js فيه كود مشابه، تأكد أن العنصر موجود قبل إضافة الحدث:
-    // مثال:
-    // document.addEventListener("DOMContentLoaded", () => {
-    //     const shareBtn = document.getElementById("share-button");
-    //     if (shareBtn) {
-    //         shareBtn.addEventListener("click", () => { ... });
-    //     }
-    // });
+        this.countdownInterval = setInterval(() => {
+            const now = new Date();
+            const remaining = this.currentSession.clockOutTime - now;
+            
+            if (remaining <= 0) {
+                this.countdownTime.textContent = '00:00:00';
+                this.countdownTime.classList.remove('warning');
+                clearInterval(this.countdownInterval);
+                this.showNotification(this.isEnglish ? '🎉 Your shift is complete!' : '🎉 انتهت ورديتك!', 'success');
+                this.playNotificationSound();
+                return;
+            }
+            
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+            
+            this.countdownTime.textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Warning notification
+            if (remaining <= this.settings.warningTime * 60 * 1000 && !this.countdownTime.classList.contains('warning')) {
+                this.countdownTime.classList.add('warning');
+                this.showNotification(
+                    this.isEnglish
+                        ? `⚠️ Only ${this.settings.warningTime} minutes left!`
+                        : `⚠️ تبقى ${this.settings.warningTime} دقيقة فقط!`,
+                    'warning'
+                );
+                this.playNotificationSound();
+                this.sendDesktopNotification(
+                    this.isEnglish
+                        ? `Only ${this.settings.warningTime} minutes left in your shift!`
+                        : `تبقى ${this.settings.warningTime} دقيقة فقط في ورديتك!`
+                );
+            }
+            
+            this.updateDisplay();
+        }, 1000);
+    }
 
-    // تشغيل التطبيق بعد تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', () => {
-        window.myShiftPro = new MyShiftPro();
-    });
+    updateStatistics() {
+        const today = new Date();
+        const todayStr = today.toDateString();
+        const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        let todayHours = 0;
+        let weekHours = 0;
+        let monthHours = 0;
+        let overtimeHours = 0;
+        
+        this.workHistory.forEach(session => {
+            if (!session.actualDuration) return;
+            
+            const sessionDate = new Date(session.clockInTime);
+            const workHours = session.actualDuration;
+            
+            if (sessionDate.toDateString() === todayStr) {
+                todayHours += workHours;
+            }
+            
+            if (sessionDate >= weekStart) {
+                weekHours += workHours;
+            }
+            
+            if (sessionDate >= monthStart) {
+                monthHours += workHours;
+            }
+            
+            if (workHours > 8) {
+                overtimeHours += workHours - 8;
+            }
+        });
+        
+        this.todayHours.textContent = todayHours.toFixed(1);
+        this.weekHours.textContent = weekHours.toFixed(1);
+        this.monthHours.textContent = monthHours.toFixed(1);
+        this.overtimeHours.textContent = overtimeHours.toFixed(1);
+        
+        // Calculate productivity score
+        const targetHours = 8;
+        const productivity = Math.min(100, Math.max(0, (todayHours / targetHours) * 100));
+        this.productivityFill.style.width = `${productivity}%`;
+        this.productivityScore.textContent = `${Math.round(productivity)}%`;
+    }
+
+    updateCalendar() {
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        
+        this.calendarMonth.textContent = new Date(year, month).toLocaleDateString('en-US', {
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+        
+        this.calendarGrid.innerHTML = '';
+        
+        // Add day headers
+        const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        dayHeaders.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'calendar-day';
+            dayHeader.textContent = day;
+            dayHeader.style.fontWeight = 'bold';
+            dayHeader.style.background = 'var(--primary-color)';
+            dayHeader.style.color = 'white';
+            this.calendarGrid.appendChild(dayHeader);
+        });
+        
+        // Add calendar days
+        for (let i = 0; i < 42; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+            
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day';
+            dayDiv.textContent = currentDate.getDate();
+            
+            if (currentDate.getMonth() !== month) {
+                dayDiv.style.opacity = '0.3';
+            }
+            
+            if (currentDate.toDateString() === new Date().toDateString()) {
+                dayDiv.classList.add('today');
+            }
+            
+            // Check if worked on this day
+            const workedThisDay = this.workHistory.some(session => 
+                new Date(session.clockInTime).toDateString() === currentDate.toDateString()
+            );
+            
+            if (workedThisDay) {
+                dayDiv.classList.add('worked');
+            }
+            
+            this.calendarGrid.appendChild(dayDiv);
+        }
+    }
+
+    changeMonth(direction) {
+        this.currentDate.setMonth(this.currentDate.getMonth() + direction);
+        this.updateCalendar();
+    }
+
+    toggleTheme() {
+        this.isDarkMode = !this.isDarkMode;
+        document.body.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
+        this.themeToggle.textContent = this.isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+        this.saveData();
+    }
+
+    toggleLanguage() {
+        this.isEnglish = !this.isEnglish;
+        this.langToggle.textContent = this.isEnglish ? '🌐 عربي' : '🌐 English';
+        this.translateInterface();
+        this.saveData();
+    }
+
+    translateInterface() {
+        // Full Arabic translation
+        if (!this.isEnglish) {
+            document.querySelector('.logo').textContent = 'ماي شيفت برو';
+            document.querySelector('.subtitle').textContent = 'متتبع ساعات العمل المتقدم';
+            document.querySelector('.card.shift-controls .card-title').textContent = '⏰ تحكم في الوردية';
+            document.querySelectorAll('.shift-type')[0].innerHTML = '<h4>وردية عادية</h4><p>8 ساعات</p>';
+            document.querySelectorAll('.shift-type')[1].innerHTML = '<h4>وردية ممتدة</h4><p>10 ساعات</p>';
+            document.querySelectorAll('.shift-type')[2].innerHTML = '<h4>وردية طويلة</h4><p>12 ساعة</p>';
+            document.querySelectorAll('.shift-type')[3].innerHTML = '<h4>دوام جزئي</h4><p>4 ساعات</p>';
+            document.querySelector('.custom-duration label').textContent = 'المدة المخصصة:';
+            document.querySelectorAll('.custom-duration label')[1].textContent = 'وقت الدخول اليدوي:';
+            this.clockInBtn.textContent = this.currentSession && this.currentSession.clockInTime ? '🕐 تسجيل الخروج' : '🕐 تسجيل الدخول';
+            this.resetBtn.textContent = '🔄 إعادة تعيين';
+            document.querySelector('.card:nth-child(2) .card-title').textContent = '📊 الإحصائيات';
+            document.querySelectorAll('.stat-label')[0].textContent = 'اليوم';
+            document.querySelectorAll('.stat-label')[1].textContent = 'هذا الأسبوع';
+            document.querySelectorAll('.stat-label')[2].textContent = 'هذا الشهر';
+            document.querySelectorAll('.stat-label')[3].textContent = 'ساعات إضافية';
+            document.querySelector('.productivity-meter h4').textContent = 'مؤشر الإنتاجية';
+            document.querySelector('.card:nth-child(3) .card-title').textContent = '📅 التقويم';
+            document.querySelector('.calendar-header h4').textContent = this.calendarMonth.textContent.replace(/[A-Za-z]+/, m => this.getArabicMonth(m));
+            document.querySelector('.card:nth-child(4) .card-title').textContent = '⚙️ الإعدادات';
+            document.querySelectorAll('.settings-label')[0].textContent = 'صوت التنبيه';
+            document.querySelectorAll('.settings-label')[1].textContent = 'وقت التحذير (دقائق)';
+            document.querySelector('.export-section h4').textContent = 'تصدير البيانات';
+            document.getElementById('exportCSV').textContent = '📄 تصدير CSV';
+            document.getElementById('exportJSON').textContent = '📋 تصدير JSON';
+            document.getElementById('backupData').textContent = '💾 نسخة احتياطية';
+            document.querySelector('.card:last-child .card-title').textContent = '📝 الملاحظات اليومية';
+            this.dailyNotes.placeholder = 'أضف ملاحظات حول يوم عملك...';
+            document.documentElement.dir = 'rtl';
+        } else {
+            // Restore English
+            document.querySelector('.logo').textContent = 'MyShift Pro';
+            document.querySelector('.subtitle').textContent = 'Advanced Work Hours Tracker';
+            document.querySelector('.card.shift-controls .card-title').textContent = '⏰ Shift Controls';
+            document.querySelectorAll('.shift-type')[0].innerHTML = '<h4>Standard Shift</h4><p>8 hours</p>';
+            document.querySelectorAll('.shift-type')[1].innerHTML = '<h4>Extended Shift</h4><p>10 hours</p>';
+            document.querySelectorAll('.shift-type')[2].innerHTML = '<h4>Long Shift</h4><p>12 hours</p>';
+            document.querySelectorAll('.shift-type')[3].innerHTML = '<h4>Part Time</h4><p>4 hours</p>';
+            document.querySelector('.custom-duration label').textContent = 'Custom Duration:';
+            document.querySelectorAll('.custom-duration label')[1].textContent = 'Manual Clock In:';
+            this.clockInBtn.textContent = this.currentSession && this.currentSession.clockInTime ? '🕐 Clock Out' : '🕐 Clock In';
+            this.resetBtn.textContent = '🔄 Reset';
+            document.querySelector('.card:nth-child(2) .card-title').textContent = '📊 Statistics';
+            document.querySelectorAll('.stat-label')[0].textContent = 'Today';
+            document.querySelectorAll('.stat-label')[1].textContent = 'This Week';
+            document.querySelectorAll('.stat-label')[2].textContent = 'This Month';
+            document.querySelectorAll('.stat-label')[3].textContent = 'Overtime';
+            document.querySelector('.productivity-meter h4').textContent = 'Productivity Score';
+            document.querySelector('.card:nth-child(3) .card-title').textContent = '📅 Calendar';
+            document.querySelector('.calendar-header h4').textContent = this.calendarMonth.textContent;
+            document.querySelector('.card:nth-child(4) .card-title').textContent = '⚙️ Settings';
+            document.querySelectorAll('.settings-label')[0].textContent = 'Notification Sound';
+            document.querySelectorAll('.settings-label')[1].textContent = 'Warning Time (minutes)';
+            document.querySelector('.export-section h4').textContent = 'Export Data';
+            document.getElementById('exportCSV').textContent = '📄 Export CSV';
+            document.getElementById('exportJSON').textContent = '📋 Export JSON';
+            document.getElementById('backupData').textContent = '💾 Backup';
+            document.querySelector('.card:last-child .card-title').textContent = '📝 Daily Notes';
+            this.dailyNotes.placeholder = 'Add notes about your workday...';
+            document.documentElement.dir = 'ltr';
+        }
+    }
+
+    getArabicMonth(engMonth) {
+        const months = {
+            January: 'يناير', February: 'فبراير', March: 'مارس', April: 'أبريل',
+            May: 'مايو', June: 'يونيو', July: 'يوليو', August: 'أغسطس',
+            September: 'سبتمبر', October: 'أكتوبر', November: 'نوفمبر', December: 'ديسمبر'
+        };
+        return months[engMonth] || engMonth;
+    }
+
+    updateSettings() {
+        this.settings.notificationSound = this.notificationSound.value;
+        this.settings.warningTime = parseInt(this.warningTime.value);
+        this.saveData();
+    }
+
+    exportData(format) {
+        const data = {
+            workHistory: this.workHistory,
+            settings: this.settings,
+            exportDate: new Date().toISOString()
+        };
+        
+        if (format === 'json') {
+            const dataStr = JSON.stringify(data, null, 2);
+            this.downloadFile(dataStr, 'myshift-data.json', 'application/json');
+        } else if (format === 'csv') {
+            let csv = this.isEnglish
+                ? 'Date,Clock In,Clock Out,Hours Worked,Notes\n'
+                : 'التاريخ,وقت الدخول,وقت الخروج,ساعات العمل,ملاحظات\n';
+            this.workHistory.forEach(session => {
+                const date = new Date(session.clockInTime).toLocaleDateString();
+                const clockIn = this.formatTime(new Date(session.clockInTime));
+                const clockOut = session.actualClockOutTime ? this.formatTime(new Date(session.actualClockOutTime)) : 'N/A';
+                const hours = session.actualDuration ? (session.actualDuration).toFixed(2) : '0';
+                const notes = session.notes || '';
+                
+                csv += `${date},"${clockIn}","${clockOut}",${hours},"${notes}"\n`;
+            });
+            this.downloadFile(csv, 'myshift-data.csv', 'text/csv');
+        }
+        
+        this.showNotification(
+            this.isEnglish
+                ? `Data exported as ${format.toUpperCase()}`
+                : `تم تصدير البيانات كـ ${format.toUpperCase()}`,
+            'success'
+        );
+    }
+
+    backupData() {
+        const backup = {
+            workHistory: this.workHistory,
+            settings: this.settings,
+            currentSession: this.currentSession,
+            isDarkMode: this.isDarkMode,
+            isEnglish: this.isEnglish,
+            backupDate: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(backup, null, 2);
+        this.downloadFile(dataStr, `myshift-backup-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+        this.showNotification('Backup created successfully!', 'success');
+    }
+
+    downloadFile(content, filename, contentType) {
+        const blob = new Blob([content], { type: contentType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    saveNotes() {
+        if (this.currentSession) {
+            this.currentSession.notes = this.dailyNotes.value;
+            this.saveData();
+        }
+    }
+
+    playNotificationSound() {
+        if (this.settings.notificationSound === 'none') return;
+        
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            switch (this.settings.notificationSound) {
+                case 'chime':
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    break;
+                case 'bell':
+                    oscillator.frequency.value = 1200;
+                    oscillator.type = 'triangle';
+                    break;
+                default:
+                    oscillator.frequency.value = 600;
+                    oscillator.type = 'square';
+            }
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (e) {
+            console.log('Audio not supported');
+        }
+    }
+
+    requestNotificationPermission() {
+        if ('Notification' in window) {
+            Notification.requestPermission();
+        }
+    }
+
+    sendDesktopNotification(message) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('MyShift Pro', {
+                body: message,
+                icon: '⏰',
+                badge: '⏰'
+            });
+        }
+    }
+
+    showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        this.notificationContainer.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    formatTime(date) {
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    // Storage methods (using in-memory storage for demo)
+    saveData() {
+        this.savedData = {
+            workHistory: this.workHistory,
+            settings: this.settings,
+            currentSession: this.currentSession,
+            isDarkMode: this.isDarkMode,
+            isEnglish: this.isEnglish
+        };
+    }
+
+    loadData() {
+        if (this.savedData) {
+            this.workHistory = this.savedData.workHistory || [];
+            this.settings = {...this.settings, ...this.savedData.settings};
+            this.currentSession = this.savedData.currentSession;
+            this.isDarkMode = this.savedData.isDarkMode || false;
+            this.isEnglish = this.savedData.isEnglish !== undefined ? this.savedData.isEnglish : true;
+            
+            // Update UI based on loaded data
+            document.body.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
+            this.themeToggle.textContent = this.isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+            this.langToggle.textContent = this.isEnglish ? '🌐 عربي' : '🌐 English';
+            
+            // Update settings inputs
+            this.notificationSound.value = this.settings.notificationSound;
+            this.warningTime.value = this.settings.warningTime;
+            
+            // Restore session if exists
+            if (this.currentSession && this.currentSession.clockInTime) {
+                this.currentSession.clockInTime = new Date(this.currentSession.clockInTime);
+                this.currentSession.clockOutTime = new Date(this.currentSession.clockOutTime);
+                
+                if (this.currentSession.actualClockOutTime) {
+                    this.currentSession.actualClockOutTime = new Date(this.currentSession.actualClockOutTime);
+                }
+                
+                // Restore breaks
+                if (this.currentSession.breaks) {
+                    this.currentSession.breaks = this.currentSession.breaks.map(breakItem => ({
+                        ...breakItem,
+                        start: new Date(breakItem.start),
+                        end: new Date(breakItem.end)
+                    }));
+                }
+                
+                const now = new Date();
+                if (now < this.currentSession.clockOutTime) {
+                    this.clockInBtn.textContent = '🕐 Clock Out';
+                    this.sessionInfo.classList.add('active');
+                    this.customHours.value = this.currentSession.plannedDuration;
+                    this.dailyNotes.value = this.currentSession.notes || '';
+                    
+                    this.updateDisplay();
+                    this.startCountdown();
+                } else {
+                    this.currentSession = null;
+                }
+            }
+            
+            this.translateInterface();
+        }
+    }
+}
+
+// Initialize the app
+document.addEventListener('DOMContentLoaded', () => {
+    new MyShiftPro();
+});
     </script>
 </body>
 </html>
