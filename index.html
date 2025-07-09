@@ -1082,18 +1082,40 @@ class MyShiftPro {
     }
 
     updateDisplay() {
-        if (!this.currentSession) return;
-        
+        if (this.currentSession) {
+            // تأكد أن القيم من نوع Date وليست string
+            if (typeof this.currentSession.clockInTime === 'string') {
+                this.currentSession.clockInTime = new Date(this.currentSession.clockInTime);
+            }
+            if (typeof this.currentSession.clockOutTime === 'string') {
+                this.currentSession.clockOutTime = new Date(this.currentSession.clockOutTime);
+            }
+        }
+        if (!this.currentSession) {
+            this.sessionInfo.classList.remove('active');
+            // Clear displayed values when no session is active
+            this.clockInTime.textContent = '--:--';
+            this.clockOutTime.textContent = '--:--';
+            this.totalWork.textContent = '0h 0m';
+            this.breakTime.textContent = '0h 0m';
+            this.breakList.innerHTML = '';
+            this.countdownTime.textContent = '00:00:00';
+            this.countdownTime.classList.remove('warning');
+            return;
+        }
+        // إذا كانت هناك جلسة نشطة، أظهر معلومات الجلسة
+        this.sessionInfo.classList.add('active');
+
         this.clockInTime.textContent = this.formatTime(this.currentSession.clockInTime);
         this.clockOutTime.textContent = this.formatTime(this.currentSession.clockOutTime);
-        
+
         const now = new Date();
         const workedMs = now - this.currentSession.clockInTime;
         const workedHours = Math.floor(workedMs / (1000 * 60 * 60));
         const workedMinutes = Math.floor((workedMs % (1000 * 60 * 60)) / (1000 * 60));
-        
+
         this.totalWork.textContent = `${workedHours}h ${workedMinutes}m`;
-        
+
         // Break always 0
         this.breakTime.textContent = `0h 0m`;
         this.breakList.innerHTML = '';
@@ -1239,6 +1261,7 @@ class MyShiftPro {
             if (currentDate.getMonth() !== month) {
                 dayDiv.style.opacity = '0.3';
             }
+            
             
             if (currentDate.toDateString() === new Date().toDateString()) {
                 dayDiv.classList.add('today');
@@ -1507,25 +1530,30 @@ class MyShiftPro {
             isEnglish: this.isEnglish
         };
         // حفظ في فايربيز
-        const payload = this.savedData;
+        const payload = JSON.parse(JSON.stringify(this.savedData, (key, value) => {
+            // إذا كان value كائن Date، حوله إلى نص ISO
+            if (value instanceof Date) {
+                return value.toISOString();
+            }
+            return value;
+        }));
         const todayKey = new Date().toISOString().split('T')[0];
         set(shiftTodayRef, payload.currentSession || null);
         set(dbRef(database, `shiftSessions/history/${todayKey}`), payload.currentSession || null);
     }
 
     loadData() {
-        // تحميل من فايربيز وتحديث الكائن
         onValue(shiftTodayRef, (snapshot) => {
             const session = snapshot.val();
-            // تحقق أن الجلسة لم تنتهِ بعد (لم يتم عمل Clock Out)
-            if (session && session.clockInTime && !session.actualClockOutTime) {
-                session.clockInTime = new Date(session.clockInTime);
-                session.clockOutTime = new Date(session.clockOutTime);
+            if (session) {
+                // حول النصوص إلى كائنات Date
+                if (session.clockInTime) session.clockInTime = new Date(session.clockInTime);
+                if (session.clockOutTime) session.clockOutTime = new Date(session.clockOutTime);
+                if (session.actualClockOutTime) session.actualClockOutTime = new Date(session.actualClockOutTime);
                 this.currentSession = session;
                 this.updateDisplay();
                 this.startCountdown();
             } else {
-                // إذا لا توجد جلسة نشطة، أعد ضبط الواجهة
                 this.currentSession = null;
                 this.sessionInfo.classList.remove('active');
                 this.clockInBtn.textContent = '🕐 Clock In';
@@ -1535,7 +1563,12 @@ class MyShiftPro {
         onValue(shiftHistoryRef, (snapshot) => {
             const historyData = snapshot.val();
             if (historyData) {
-                this.workHistory = Object.values(historyData).filter(Boolean);
+                this.workHistory = Object.values(historyData).filter(Boolean).map(session => {
+                    if (session.clockInTime) session.clockInTime = new Date(session.clockInTime);
+                    if (session.clockOutTime) session.clockOutTime = new Date(session.clockOutTime);
+                    if (session.actualClockOutTime) session.actualClockOutTime = new Date(session.actualClockOutTime);
+                    return session;
+                });
                 this.updateStatistics();
                 this.updateCalendar();
             }
