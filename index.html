@@ -1490,6 +1490,7 @@ class MyShiftPro {
 
     // Storage methods (using in-memory storage for demo)
     saveData() {
+        // حفظ في الذاكرة
         this.savedData = {
             workHistory: this.workHistory,
             settings: this.settings,
@@ -1497,59 +1498,36 @@ class MyShiftPro {
             isDarkMode: this.isDarkMode,
             isEnglish: this.isEnglish
         };
+        // حفظ في فايربيز
+        const payload = this.savedData;
+        const todayKey = new Date().toISOString().split('T')[0];
+        set(shiftTodayRef, payload.currentSession || null);
+        set(dbRef(database, `shiftSessions/history/${todayKey}`), payload.currentSession || null);
     }
 
     loadData() {
-        if (this.savedData) {
-            this.workHistory = this.savedData.workHistory || [];
-            this.settings = {...this.settings, ...this.savedData.settings};
-            this.currentSession = this.savedData.currentSession;
-            this.isDarkMode = this.savedData.isDarkMode || false;
-            this.isEnglish = this.savedData.isEnglish !== undefined ? this.savedData.isEnglish : true;
-            
-            // Update UI based on loaded data
-            document.body.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
-            this.themeToggle.textContent = this.isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
-            this.langToggle.textContent = this.isEnglish ? '🌐 عربي' : '🌐 English';
-            
-            // Update settings inputs
-            this.notificationSound.value = this.settings.notificationSound;
-            this.warningTime.value = this.settings.warningTime;
-            
-            // Restore session if exists
-            if (this.currentSession && this.currentSession.clockInTime) {
-                this.currentSession.clockInTime = new Date(this.currentSession.clockInTime);
-                this.currentSession.clockOutTime = new Date(this.currentSession.clockOutTime);
-                
-                if (this.currentSession.actualClockOutTime) {
-                    this.currentSession.actualClockOutTime = new Date(this.currentSession.actualClockOutTime);
-                }
-                
-                // Restore breaks
-                if (this.currentSession.breaks) {
-                    this.currentSession.breaks = this.currentSession.breaks.map(breakItem => ({
-                        ...breakItem,
-                        start: new Date(breakItem.start),
-                        end: new Date(breakItem.end)
-                    }));
-                }
-                
-                const now = new Date();
-                if (now < this.currentSession.clockOutTime) {
-                    this.clockInBtn.textContent = '🕐 Clock Out';
-                    this.sessionInfo.classList.add('active');
-                    this.customHours.value = this.currentSession.plannedDuration;
-                    this.dailyNotes.value = this.currentSession.notes || '';
-                    
-                    this.updateDisplay();
-                    this.startCountdown();
-                } else {
-                    this.currentSession = null;
-                }
+        // تحميل من فايربيز وتحديث الكائن
+        onValue(shiftTodayRef, (snapshot) => {
+            const session = snapshot.val();
+            if (session && session.clockInTime) {
+                session.clockInTime = new Date(session.clockInTime);
+                session.clockOutTime = new Date(session.clockOutTime);
+                if (session.actualClockOutTime)
+                    session.actualClockOutTime = new Date(session.actualClockOutTime);
+                this.currentSession = session;
+                this.updateDisplay();
+                this.startCountdown();
             }
-            
-            this.translateInterface();
-        }
+        });
+
+        onValue(shiftHistoryRef, (snapshot) => {
+            const historyData = snapshot.val();
+            if (historyData) {
+                this.workHistory = Object.values(historyData).filter(Boolean);
+                this.updateStatistics();
+                this.updateCalendar();
+            }
+        });
     }
 }
 
