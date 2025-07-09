@@ -618,6 +618,21 @@
     </style>
 </head>
 <body>
+    <div id="connectionStatus" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        background: #10b981;
+        color: white;
+        text-align: center;
+        font-weight: bold;
+        padding: 8px 0;
+        z-index: 2000;
+        transition: background 0.3s;
+    ">
+        ✅ متصل بالخادم
+    </div>
     <div class="app-container">
         <div class="header">
             <div class="logo">MyShift Pro</div>
@@ -789,7 +804,29 @@
     <!-- Notification Container -->
     <div id="notificationContainer"></div>
 
-    <script>
+    <script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getDatabase, set, ref as dbRef, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+
+const firebaseConfig = {
+            apiKey: "AIzaSyBPYWUqHa6v28jt496_L6ExtXS_pqSQow4",
+            authDomain: "shopping-d3ea3.firebaseapp.com",
+            databaseURL: "https://shopping-d3ea3-default-rtdb.firebaseio.com",
+            projectId: "shopping-d3ea3",
+            storageBucket: "shopping-d3ea3.firebasestorage.app",
+            messagingSenderId: "434241138137",
+            appId: "1:434241138137:web:ce049431ac46db9b93fdc8",
+            measurementId: "G-STYC586XED"
+        };
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const shiftTodayRef = dbRef(database, "shiftSessions/today");
+const shiftHistoryRef = dbRef(database, "shiftSessions/history");
+
+
 class MyShiftPro {
     constructor() {
         this.isEnglish = true;
@@ -1518,8 +1555,67 @@ class MyShiftPro {
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
-    new MyShiftPro();
+    myShiftPro = new MyShiftPro();
 });
-    </script>
+    
+    // ======================== Firebase Save & Load ========================
+    function saveDataToFirebase() {
+        const payload = {
+            workHistory: myShiftPro.workHistory,
+            settings: myShiftPro.settings,
+            currentSession: myShiftPro.currentSession,
+            isDarkMode: myShiftPro.isDarkMode,
+            isEnglish: myShiftPro.isEnglish
+        };
+
+        const todayKey = new Date().toISOString().split('T')[0];
+        set(shiftTodayRef, payload.currentSession || null);
+        set(dbRef(database, `shiftSessions/history/${todayKey}`), payload.currentSession || null);
+    }
+
+    function loadDataFromFirebase() {
+        onValue(shiftTodayRef, (snapshot) => {
+            const session = snapshot.val();
+            if (session && session.clockInTime) {
+                session.clockInTime = new Date(session.clockInTime);
+                session.clockOutTime = new Date(session.clockOutTime);
+                if (session.actualClockOutTime)
+                    session.actualClockOutTime = new Date(session.actualClockOutTime);
+                myShiftPro.currentSession = session;
+                myShiftPro.updateDisplay();
+                myShiftPro.startCountdown();
+            }
+        });
+
+        onValue(shiftHistoryRef, (snapshot) => {
+            const historyData = snapshot.val();
+            if (historyData) {
+                myShiftPro.workHistory = Object.values(historyData).filter(Boolean);
+                myShiftPro.updateStatistics();
+                myShiftPro.updateCalendar();
+            }
+        });
+    }
+
+    // استبدال الدوال الأصلية
+    MyShiftPro.prototype.saveData = saveDataToFirebase;
+    MyShiftPro.prototype.loadData = loadDataFromFirebase;
+
+import { onValue, ref as dbRef, getDatabase } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+// مؤشر الاتصال
+const connectionStatus = document.getElementById('connectionStatus');
+const connectedRef = dbRef(database, ".info/connected");
+
+onValue(connectedRef, (snap) => {
+    if (snap.val() === true) {
+        connectionStatus.textContent = "✅ متصل بالخادم";
+        connectionStatus.style.background = "#10b981";
+    } else {
+        connectionStatus.textContent = "❌ غير متصل بالخادم";
+        connectionStatus.style.background = "#ef4444";
+    }
+});
+</script>
 </body>
 </html>
