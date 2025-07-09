@@ -987,7 +987,8 @@ class MyShiftPro {
             totalBreakTime: 0,
             notes: '',
         };
-        
+        this.updateDisplay();
+        this.startCountdown();
         this.clockInBtn.textContent = '🕐 Clock Out';
         this.sessionInfo.classList.add('active');
         
