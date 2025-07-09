@@ -1105,6 +1105,14 @@ class MyShiftPro {
         }
 
         this.countdownInterval = setInterval(() => {
+            // تحقق من وجود جلسة نشطة ووقت خروج
+            if (!this.currentSession || !this.currentSession.clockOutTime) {
+                clearInterval(this.countdownInterval);
+                this.countdownTime.textContent = '00:00:00';
+                this.countdownTime.classList.remove('warning');
+                return;
+            }
+
             const now = new Date();
             const remaining = this.currentSession.clockOutTime - now;
             
@@ -1121,7 +1129,7 @@ class MyShiftPro {
             const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
             
-            this.countdownTime.textContent = 
+            this.countdownTime.textContent =
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
             // Warning notification
