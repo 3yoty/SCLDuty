@@ -1536,50 +1536,7 @@ document.addEventListener('DOMContentLoaded', () => {
     myShiftPro = new MyShiftPro();
 });
     
-    // ======================== Firebase Save & Load ========================
-    function saveDataToFirebase() {
-        const payload = {
-            workHistory: myShiftPro.workHistory,
-            settings: myShiftPro.settings,
-            currentSession: myShiftPro.currentSession,
-            isDarkMode: myShiftPro.isDarkMode,
-            isEnglish: myShiftPro.isEnglish
-        };
-
-        const todayKey = new Date().toISOString().split('T')[0];
-        set(shiftTodayRef, payload.currentSession || null);
-        set(dbRef(database, `shiftSessions/history/${todayKey}`), payload.currentSession || null);
-    }
-
-    function loadDataFromFirebase() {
-        onValue(shiftTodayRef, (snapshot) => {
-            const session = snapshot.val();
-            if (session && session.clockInTime) {
-                session.clockInTime = new Date(session.clockInTime);
-                session.clockOutTime = new Date(session.clockOutTime);
-                if (session.actualClockOutTime)
-                    session.actualClockOutTime = new Date(session.actualClockOutTime);
-                myShiftPro.currentSession = session;
-                myShiftPro.updateDisplay();
-                myShiftPro.startCountdown();
-            }
-        });
-
-        onValue(shiftHistoryRef, (snapshot) => {
-            const historyData = snapshot.val();
-            if (historyData) {
-                myShiftPro.workHistory = Object.values(historyData).filter(Boolean);
-                myShiftPro.updateStatistics();
-                myShiftPro.updateCalendar();
-            }
-        });
-    }
-
-    // استبدال الدوال الأصلية
-    MyShiftPro.prototype.saveData = saveDataToFirebase;
-    MyShiftPro.prototype.loadData = loadDataFromFirebase;
-
-import { onValue, ref as dbRef, getDatabase } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { onValue, ref as dbRef, getDatabase } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
 // مؤشر الاتصال
 const connectionStatus = document.getElementById('connectionStatus');
